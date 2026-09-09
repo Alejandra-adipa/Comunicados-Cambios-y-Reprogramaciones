@@ -1,26 +1,135 @@
 @import "tailwindcss";
 
+/**
+ * Sistema de diseño Adipa.
+ * Los valores vienen de DESIGN.md; no se aproximan ni se inventan colores.
+ * Lo que no tiene equivalente en el manual va marcado como needs-brand-definition.
+ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Colores corporativos principales */
+  --brand-primary: #704efd;
+  --brand-secondary: #2cb7ff;
+  --brand-surface-soft: #f3f4ff;
+
+  /* Complementarios */
+  --brand-text-strong: #091e42;
+  --brand-surface-blue-soft: #cbe8ff;
+  --brand-surface-lavender: #dfd5ff;
+
+  /* needs-brand-definition — necesarios para UI, sin equivalente en el manual */
+  --foreground-default: #1d1d1d;
+  --foreground-muted: #5b6987;
+  --foreground-subtle: #8c93a8;
+  --border-subtle: #e3e8f3;
+  --border-strong: #9ba7bd;
+  --color-success: #4dc247;
+  --color-error: #d9485f;
+
+  /* Superficies */
+  --surface: #ffffff;
+  --surface-page: #f3f4ff;
+
+  /* Radios de UI: 4 / 6 / 8, nada más */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+
+  /* Sombras con base navy, según DESIGN.md §15.5 */
+  --shadow-card: 0 1px 3px rgb(9 30 66 / 0.15);
+  --shadow-card-hover: 0 6px 18px rgb(9 30 66 / 0.08);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-brand: var(--brand-primary);
+  --color-brand-secondary: var(--brand-secondary);
+  --color-brand-soft: var(--brand-surface-soft);
+  --color-brand-navy: var(--brand-text-strong);
+  --color-brand-blue-soft: var(--brand-surface-blue-soft);
+  --color-brand-lavender: var(--brand-surface-lavender);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-ink: var(--foreground-default);
+  --color-ink-muted: var(--foreground-muted);
+  --color-ink-subtle: var(--foreground-subtle);
+  --color-line: var(--border-subtle);
+  --color-line-strong: var(--border-strong);
+  --color-success: var(--color-success);
+  --color-error: var(--color-error);
+  --color-surface: var(--surface);
+  --color-surface-page: var(--surface-page);
+
+  --radius-adipa-sm: var(--radius-sm);
+  --radius-adipa-control: var(--radius-lg);
+  --radius-adipa-card: var(--radius-lg);
+  --radius-adipa-media: var(--radius-lg);
+
+  --font-sans: var(--font-poppins), Helvetica, sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--surface-page);
+  color: var(--foreground-default);
+}
+
+/* Card estándar del producto digital Adipa (DESIGN.md §15.4). */
+.adipa-card {
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.adipa-card-interactive {
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.adipa-card-interactive:hover {
+  border-color: rgba(112, 78, 253, 0.24);
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* Controles de formulario: un solo aspecto en toda la aplicación. */
+input[type="text"],
+input[type="date"],
+input[type="email"],
+select,
+textarea {
+  width: 100%;
+  background: var(--surface);
+  color: var(--foreground-default);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 0.55rem 0.75rem;
+  font: inherit;
+  font-size: 0.9rem;
+  outline: none;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+input[type="text"]:focus,
+input[type="date"]:focus,
+input[type="email"]:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px rgba(112, 78, 253, 0.16);
+}
+
+textarea {
+  line-height: 1.65;
+  resize: vertical;
+}
+
+::placeholder {
+  color: var(--foreground-subtle);
+}
+
+/* Foco visible y consistente para lo que no es un input. */
+:where(a, button, [tabindex]):focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
 }
