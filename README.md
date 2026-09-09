@@ -127,19 +127,32 @@ bloquear el formulario.
 
 ## Dónde viven los datos
 
-Hay dos almacenes, y la aplicación elige solo. Ninguna pantalla ni ruta sabe
+Hay tres almacenes, y la aplicación elige solo. Ninguna pantalla ni ruta sabe
 cuál está en uso: todos hablan con la interfaz `Almacen`
 (`lib/almacen/tipos.ts`).
 
 | Dónde | Almacén | Qué pasa con los datos |
 |---|---|---|
 | En tu equipo | `lib/almacen/archivos.ts` | Un archivo JSON por solicitud, persistente |
-| En Vercel | `lib/almacen/memoria.ts` | Solicitudes inventadas en memoria, se pierden al reiniciar |
+| En Vercel, con Blob conectado | `lib/almacen/blob.ts` | Archivos privados compartidos entre instancias |
+| En Vercel, sin Blob | `lib/almacen/memoria.ts` | Solicitudes inventadas en memoria, solo para mirar |
 
 En un despliegue sin disco donde escribir, intentar guardar en el sistema de
-archivos devuelve un error de servidor en la primera pantalla; por eso ahí entra
-el almacén de demostración. `ALMACEN=memoria` o `ALMACEN=archivos` fuerza uno u
-otro para probar en el equipo cómo se ve el despliegue.
+archivos devuelve un error de servidor en la primera pantalla; por eso ahí no se
+usa el almacén de archivos.
+
+**El almacén en memoria no sirve para crear comunicados.** En un servidor sin
+estado cada petición puede atenderla una instancia distinta, y lo que guarda una
+no existe para la siguiente: la solicitud recién creada daría 404 al abrirla. Por
+eso declara `puedeCrear: false` y la pantalla de inicio desactiva el botón con
+una explicación, en vez de dejar que la página se rompa más adelante.
+
+Para que el espacio de prueba permita el recorrido completo hay que conectarle un
+store de Vercel Blob: en el panel del proyecto, **Storage → Create → Blob**. Eso
+inyecta `BLOB_READ_WRITE_TOKEN` y la aplicación cambia sola de almacén.
+
+`ALMACEN=memoria`, `blob` o `archivos` fuerza uno u otro para probar en el equipo
+cómo se comporta el despliegue.
 
 Los datos de demostración (`lib/almacen/demo.ts`) son inventados de principio a
 fin y usan dominios `ejemplo.*`, que no existen: **ningún correo de estudiante

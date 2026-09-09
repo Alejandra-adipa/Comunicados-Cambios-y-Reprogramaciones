@@ -12,7 +12,7 @@ import { Boton, Aviso, Girador } from "./ui";
  * Programa y tipo de comunicado son dos ejes independientes: el primero define
  * qué datos se piden y quién valida, el segundo define la plantilla.
  */
-export function NuevoComunicado() {
+export function NuevoComunicado({ puedeCrear = true }: { puedeCrear?: boolean }) {
   const router = useRouter();
   const [programa, setPrograma] = useState<string>(PROGRAMA_KEYS[0]);
   const [tipo, setTipo] = useState<string>(TIPO_KEYS[0]);
@@ -65,7 +65,15 @@ export function NuevoComunicado() {
 
       {error && <Aviso tono="error">{error}</Aviso>}
 
-      <Boton variante="primario" onClick={crear} disabled={pendiente}>
+      {!puedeCrear && (
+        <Aviso tono="neutro">
+          Este espacio de prueba solo permite abrir los comunicados de ejemplo de más abajo. Para
+          crear uno nuevo hace falta un almacenamiento compartido, o usar la aplicación en tu
+          equipo.
+        </Aviso>
+      )}
+
+      <Boton variante="primario" onClick={crear} disabled={pendiente || !puedeCrear}>
         {pendiente ? (
           <>
             <Girador /> Creando…

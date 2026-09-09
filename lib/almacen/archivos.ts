@@ -67,6 +67,7 @@ async function leerArchivo(ruta: string): Promise<Solicitud | null> {
 export const almacenArchivos: Almacen = {
   nombre: "Archivos locales",
   efimero: false,
+  puedeCrear: true,
 
   async listar() {
     await asegurarDir();

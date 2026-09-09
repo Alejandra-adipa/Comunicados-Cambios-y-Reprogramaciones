@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { CaretRightIcon } from "@phosphor-icons/react/dist/ssr";
-import { esDemostracion, listar } from "@/lib/store";
+import { estadoAlmacen, listar } from "@/lib/store";
 import { TIPOS } from "@/lib/tipos";
 import { PAISES, PROGRAMAS } from "@/lib/catalogos";
 import { destinatarios } from "@/lib/destinatarios";
@@ -34,7 +34,7 @@ function titulo(s: Solicitud) {
 
 export default async function Inicio() {
   const solicitudes = await listar();
-  const demostracion = esDemostracion();
+  const almacen = estadoAlmacen();
   const enCurso = solicitudes.filter((s) => !s.envio.enviado).length;
   const enviados = solicitudes.filter((s) => s.envio.enviado).length;
 
@@ -70,17 +70,19 @@ export default async function Inicio() {
 
       <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
         <div className="space-y-7">
-          {demostracion && (
+          {almacen.demostracion && (
             <Aviso tono="aviso">
               <strong className="font-semibold">Versión de demostración.</strong> Los comunicados que
-              ves son inventados y los correos usan dominios que no existen. Puedes recorrer todo el
-              flujo, pero los cambios se pierden cuando el servidor se reinicia. Para trabajo real,
-              usa la aplicación en tu equipo.
+              ves son inventados y los correos usan dominios que no existen.{" "}
+              {almacen.efimero
+                ? "Puedes abrirlos y recorrer el flujo, pero este espacio no conserva nada: no permite crear comunicados nuevos."
+                : "Lo que hagas acá queda guardado y lo ve cualquiera que abra la dirección, así que no cargues datos reales de estudiantes."}{" "}
+              Para trabajo real, usa la aplicación en tu equipo.
             </Aviso>
           )}
 
           <Tarjeta titulo="Nuevo comunicado" hint="El tipo define qué datos se piden">
-            <NuevoComunicado />
+            <NuevoComunicado puedeCrear={almacen.puedeCrear} />
           </Tarjeta>
 
           <Tarjeta

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { crear, listar } from "@/lib/store";
+import { crear, CreacionNoDisponible, listar } from "@/lib/store";
 import { esTipoValido } from "@/lib/tipos";
 import { esPrograma } from "@/lib/catalogos";
 
@@ -14,5 +14,14 @@ export async function POST(req: Request) {
   const programa =
     typeof body.programa === "string" && esPrograma(body.programa) ? body.programa : "curso";
 
-  return NextResponse.json(await crear(tipo, programa), { status: 201 });
+  try {
+    return NextResponse.json(await crear(tipo, programa), { status: 201 });
+  } catch (e) {
+    // El almacén de demostración no puede sostener una solicitud nueva; se dice
+    // con todas sus letras en vez de dejar una pantalla rota más adelante.
+    if (e instanceof CreacionNoDisponible) {
+      return NextResponse.json({ error: e.message }, { status: 503 });
+    }
+    throw e;
+  }
 }

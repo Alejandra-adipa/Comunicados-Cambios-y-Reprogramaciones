@@ -12,6 +12,12 @@ export interface Almacen {
   readonly nombre: string;
   /** `true` cuando los datos son de demostración y no sobreviven al reinicio. */
   readonly efimero: boolean;
+  /**
+   * `false` cuando el almacén no puede sostener una solicitud nueva. Es el caso
+   * del almacén en memoria sobre un servidor sin estado: lo que crea una
+   * instancia no existe para la siguiente.
+   */
+  readonly puedeCrear: boolean;
 
   listar(): Promise<Solicitud[]>;
   leer(id: string): Promise<Solicitud | null>;

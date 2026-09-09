@@ -29,6 +29,9 @@ const copia = (s: Solicitud): Solicitud => structuredClone(s);
 export const almacenMemoria: Almacen = {
   nombre: "Datos de demostración",
   efimero: true,
+  // Cada instancia del servidor tiene su propia memoria: una solicitud creada
+  // acá no existiría para la petición siguiente.
+  puedeCrear: false,
 
   async listar() {
     return [...datos().values()]
