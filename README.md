@@ -127,6 +127,27 @@ bloquear el formulario.
 
 ## Dónde viven los datos
 
+Hay dos almacenes, y la aplicación elige solo. Ninguna pantalla ni ruta sabe
+cuál está en uso: todos hablan con la interfaz `Almacen`
+(`lib/almacen/tipos.ts`).
+
+| Dónde | Almacén | Qué pasa con los datos |
+|---|---|---|
+| En tu equipo | `lib/almacen/archivos.ts` | Un archivo JSON por solicitud, persistente |
+| En Vercel | `lib/almacen/memoria.ts` | Solicitudes inventadas en memoria, se pierden al reiniciar |
+
+En un despliegue sin disco donde escribir, intentar guardar en el sistema de
+archivos devuelve un error de servidor en la primera pantalla; por eso ahí entra
+el almacén de demostración. `ALMACEN=memoria` o `ALMACEN=archivos` fuerza uno u
+otro para probar en el equipo cómo se ve el despliegue.
+
+Los datos de demostración (`lib/almacen/demo.ts`) son inventados de principio a
+fin y usan dominios `ejemplo.*`, que no existen: **ningún correo de estudiante
+sale del equipo**. La pantalla de inicio avisa cuando el almacén es el de
+demostración.
+
+### El almacén de archivos
+
 Un archivo JSON por solicitud en `data/solicitudes/`. La carpeta está fuera del
 control de versiones porque guarda correos reales de estudiantes.
 

@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { CaretRightIcon } from "@phosphor-icons/react/dist/ssr";
-import { listar } from "@/lib/store";
+import { esDemostracion, listar } from "@/lib/store";
 import { TIPOS } from "@/lib/tipos";
 import { PAISES, PROGRAMAS } from "@/lib/catalogos";
 import { destinatarios } from "@/lib/destinatarios";
 import { NuevoComunicado } from "@/components/NuevoComunicado";
 import { Marca } from "@/components/Marca";
-import { Tarjeta, Etiqueta, Vacio, Eyebrow, HeroOrbs } from "@/components/ui";
+import { Tarjeta, Etiqueta, Vacio, Eyebrow, HeroOrbs, Aviso } from "@/components/ui";
 import type { EstadoValidacion, Solicitud } from "@/lib/modelo";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +34,7 @@ function titulo(s: Solicitud) {
 
 export default async function Inicio() {
   const solicitudes = await listar();
+  const demostracion = esDemostracion();
   const enCurso = solicitudes.filter((s) => !s.envio.enviado).length;
   const enviados = solicitudes.filter((s) => s.envio.enviado).length;
 
@@ -69,6 +70,15 @@ export default async function Inicio() {
 
       <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
         <div className="space-y-7">
+          {demostracion && (
+            <Aviso tono="aviso">
+              <strong className="font-semibold">Versión de demostración.</strong> Los comunicados que
+              ves son inventados y los correos usan dominios que no existen. Puedes recorrer todo el
+              flujo, pero los cambios se pierden cuando el servidor se reinicia. Para trabajo real,
+              usa la aplicación en tu equipo.
+            </Aviso>
+          )}
+
           <Tarjeta titulo="Nuevo comunicado" hint="El tipo define qué datos se piden">
             <NuevoComunicado />
           </Tarjeta>
