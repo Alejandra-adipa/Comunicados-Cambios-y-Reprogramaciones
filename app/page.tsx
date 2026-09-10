@@ -1,22 +1,14 @@
-import Link from "next/link";
-import { CaretRightIcon } from "@phosphor-icons/react/dist/ssr";
 import { estadoAlmacen, listar } from "@/lib/store";
 import { TIPOS } from "@/lib/tipos";
 import { PAISES, PROGRAMAS } from "@/lib/catalogos";
 import { destinatarios } from "@/lib/destinatarios";
 import { NuevoComunicado } from "@/components/NuevoComunicado";
 import { Marca } from "@/components/Marca";
-import { Tarjeta, Etiqueta, Vacio, Eyebrow, HeroOrbs, Aviso } from "@/components/ui";
-import type { EstadoValidacion, Solicitud } from "@/lib/modelo";
+import { ListaComunicados, type ResumenComunicado } from "@/components/ListaComunicados";
+import { Tarjeta, Eyebrow, HeroOrbs, Aviso } from "@/components/ui";
+import type { Solicitud } from "@/lib/modelo";
 
 export const dynamic = "force-dynamic";
-
-const ESTADO: Record<EstadoValidacion, { texto: string; tono: "neutro" | "aviso" | "ok" | "marca" }> = {
-  borrador: { texto: "Borrador", tono: "neutro" },
-  en_revision: { texto: "En revisión", tono: "marca" },
-  observado: { texto: "Con observaciones", tono: "aviso" },
-  aprobado: { texto: "Aprobado", tono: "ok" },
-};
 
 function fecha(iso: string) {
   return new Date(iso).toLocaleString("es-CL", {
@@ -27,9 +19,20 @@ function fecha(iso: string) {
   });
 }
 
-function titulo(s: Solicitud) {
+/** Baja al panel solo lo que la lista muestra, no la solicitud entera. */
+function resumir(s: Solicitud): ResumenComunicado {
   const nombre = String(s.datos.asignatura ?? s.datos.nombrePrograma ?? s.datos.tema ?? "").trim();
-  return nombre || TIPOS[s.tipo].nombre;
+  return {
+    id: s.id,
+    titulo: nombre || TIPOS[s.tipo].nombre,
+    tipo: TIPOS[s.tipo].nombre,
+    programa: PROGRAMAS[s.programa].nombre,
+    paises: s.paises.map((p) => PAISES[p].nombre).join(" · "),
+    paso: s.paso,
+    fecha: fecha(s.actualizada),
+    destinatarios: s.contactos.length > 0 ? destinatarios(s).length : 0,
+    estado: s.envio.enviado ? "enviado" : s.estado,
+  };
 }
 
 export default async function Inicio() {
@@ -89,43 +92,7 @@ export default async function Inicio() {
             titulo="Comunicados registrados"
             hint={`${solicitudes.length} ${solicitudes.length === 1 ? "solicitud" : "solicitudes"}`}
           >
-            {solicitudes.length === 0 ? (
-              <Vacio>
-                Todavía no hay comunicados registrados. Empieza uno con el formulario de arriba.
-              </Vacio>
-            ) : (
-              <ul className="divide-y divide-line">
-                {solicitudes.map((s) => {
-                  const e = s.envio.enviado ? { texto: "Enviado", tono: "ok" as const } : ESTADO[s.estado];
-                  return (
-                    <li key={s.id}>
-                      <Link
-                        href={`/solicitud/${s.id}`}
-                        className="group -mx-2 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-adipa-control px-2 py-3 transition hover:bg-brand-soft"
-                      >
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate text-sm font-semibold text-brand-navy">
-                            {titulo(s)}
-                          </span>
-                          <span className="block text-xs text-ink-subtle">
-                            {TIPOS[s.tipo].nombre} · {PROGRAMAS[s.programa].nombre} ·{" "}
-                            {s.paises.map((p) => PAISES[p].nombre).join(" · ")} · paso {s.paso} de 6 ·{" "}
-                            {fecha(s.actualizada)}
-                            {s.contactos.length > 0 &&
-                              ` · ${destinatarios(s).length} estudiantes`}
-                          </span>
-                        </span>
-                        <Etiqueta tono={e.tono}>{e.texto}</Etiqueta>
-                        <CaretRightIcon
-                          aria-hidden
-                          className="size-4 text-ink-subtle transition group-hover:text-brand"
-                        />
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
+            <ListaComunicados comunicados={solicitudes.map(resumir)} />
           </Tarjeta>
         </div>
       </main>

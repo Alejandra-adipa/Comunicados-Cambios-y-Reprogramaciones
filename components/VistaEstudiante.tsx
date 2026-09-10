@@ -103,7 +103,10 @@ export function VistaEstudiante({
           <div className="space-y-5 px-7 py-7 sm:px-9">
             {bloques.length > 0 ? (
               bloques.map((p, i) => (
-                <p key={i} className="text-[15px] leading-[1.75] whitespace-pre-line text-ink-muted">
+                <p
+                  key={i}
+                  className="text-[15px] leading-[1.75] whitespace-pre-line text-ink-muted text-justify hyphens-auto"
+                >
                   {p}
                 </p>
               ))

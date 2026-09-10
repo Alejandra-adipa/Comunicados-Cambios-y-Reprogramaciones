@@ -212,7 +212,8 @@ export function camposDePrograma(tipo: TipoKey, programa: ProgramaKey): Campo[] 
   if (def.pideModulo) {
     campos.push(
       { k: "moduloNumero", l: "Número de módulo", t: "numero", ph: "3", req },
-      { k: "moduloNombre", l: "Nombre del módulo", t: "text", ph: "Evaluación e intervención", req },
+      // El nombre del módulo es opcional: muchas veces basta con el número.
+      { k: "moduloNombre", l: "Nombre del módulo (opcional)", t: "text", ph: "Evaluación e intervención" },
     );
   }
 
