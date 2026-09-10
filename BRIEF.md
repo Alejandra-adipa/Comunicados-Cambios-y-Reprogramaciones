@@ -170,6 +170,168 @@ virtual tal como sale.
 | | Asunto y cuerpo para copiar |
 | | Registro del envío: fecha y cantidad de destinatarios |
 
+### Datos de referencia
+
+Lo que la aplicación produce y los valores con que trabaja. Con esto, quien no
+conoce el flujo puede construirlo sin adivinar.
+
+#### Cómo se arma todo comunicado
+
+Todos siguen el mismo esqueleto, en este orden. Solo el bloque central cambia
+según el tipo.
+
+1. **Saludo** que nombra el programa: *Estimadas y estimados participantes del
+   diplomado "…":*. Si no hay nombre de programa, *Estimadas y estimados
+   estudiantes:*.
+2. **Apertura fija:** *Junto con saludar cordialmente, esperamos que se
+   encuentren muy bien.*
+3. **Bloque del tipo de comunicado** (ver la tabla siguiente).
+4. **Calendario u horarios por país**, cuando el tipo los lleva: una línea por
+   país seleccionado, con el texto tal como se escribió.
+5. **Acceso a Zoom:** si se mantiene, se dice que el enlace es el habitual del aula
+   virtual; si cambia, o si es reunión informativa, se publican enlace, ID y
+   código.
+6. **Cierre** con la casilla de atención, según la regla 13.
+7. **Firma:** *Cordialmente, Coordinación de Experiencia del Cliente.*
+
+El campo Motivo nunca aparece. El texto es siempre plano, sin formato.
+
+#### Qué cambia según el tipo de comunicado
+
+| Tipo | Datos propios | Clases | Horario por país | Zoom |
+|---|---|---|---|---|
+| Reprogramación | Docente a cargo | Número, fecha original y fecha nueva | Sí, de las nuevas sesiones, clase por clase | Según se mantenga |
+| Cambio de docente | Docente saliente, docente entrante, perfil breve, fecha efectiva | Solo número | No | Según se mantenga |
+| Suspensión | Docente, motivo que se comunica, cómo se recupera | Número y fecha original | Sí, de las sesiones suspendidas | Según se mantenga |
+| Cambio de horario | Horario anterior (hora de Chile), días de clase, vigente desde | Solo número | Sí, el horario nuevo | Según se mantenga |
+| Reunión informativa | Nombre del programa, fecha de la sesión | No | Sí | Siempre se publica |
+| Aviso general | Tema, qué necesitan saber, acción y fecha límite opcionales | No | No | No |
+
+La reunión informativa usa una plantilla fija: cambian los datos, nunca la
+estructura. En los demás tipos, el borrador es un punto de partida editable.
+
+#### Comunicado de ejemplo
+
+Salida real de la aplicación para esta solicitud:
+
+| Campo | Valor |
+|---|---|
+| Tipo de programa | Diplomado |
+| Tipo de comunicado | Reprogramación, clases específicas |
+| Países | Chile y Argentina |
+| Programa | Diplomado en Abordaje Multidisciplinario de los Trastornos de la Conducta Alimentaria (TCA) |
+| Módulo | 3, Intervención en crisis |
+| Docente | Mg. Ps. Daniela Ibacache |
+| Clases | Clase 2: jueves 17 → jueves 24 de septiembre · Clase 3: viernes 18 → viernes 25 de septiembre |
+| Horario | Chile y Argentina: 18:00 a 22:00 hrs |
+| Zoom | Se mantiene |
+
+**Asunto:** Reprogramación de clases de Diplomado en Abordaje Multidisciplinario de
+los Trastornos de la Conducta Alimentaria (TCA)
+
+```text
+Estimadas y estimados participantes del diplomado "Diplomado en Abordaje Multidisciplinario de los Trastornos de la Conducta Alimentaria (TCA)":
+
+Junto con saludar cordialmente, esperamos que se encuentren muy bien.
+
+Les escribimos para informar una modificación en la programación de las clases (módulo 3, Intervención en crisis · clases 2 y 3).
+
+Por motivos de fuerza mayor, Mg. Ps. Daniela Ibacache no podrá dictar las sesiones originalmente programadas para el jueves 17 de septiembre y el viernes 18 de septiembre.
+
+Debido a lo anterior, dichas sesiones serán reprogramadas para el jueves 24 de septiembre y el viernes 25 de septiembre.
+
+A continuación, les compartimos el calendario actualizado:
+
+Clase 2
+jueves 24 de septiembre
+Chile: 18:00 a 22:00 hrs
+Argentina: 18:00 a 22:00 hrs
+
+Clase 3
+viernes 25 de septiembre
+Chile: 18:00 a 22:00 hrs
+Argentina: 18:00 a 22:00 hrs
+
+Los accesos se mantienen sin cambios: el enlace es el mismo que utilizan habitualmente y lo encontrarán disponible en su aula virtual.
+
+Queremos expresar nuestras disculpas por este ajuste. Entendemos que una modificación de fechas puede afectar su planificación personal, laboral y académica, por lo que lamentamos las molestias y agradecemos su comprensión.
+
+En caso de tener dudas o requerir apoyo, pueden responder directamente a este correo o escribirnos a la casilla de atención de su país (Chile: sac@adipa.cl · Argentina: sac@adipa.ar).
+
+Cordialmente,
+Coordinación de Experiencia del Cliente
+```
+
+#### Estados del comunicado
+
+| Estado | Cuándo entra | Qué permite |
+|---|---|---|
+| Borrador | Al crearlo, o al editar uno que ya estaba aprobado | Editar y pedir validación |
+| En revisión | Al generar el link de revisión | Que el validador responda. El asistente queda esperando |
+| Con observaciones | Cuando el validador solicita cambios | Volver a redactar y abrir otra vuelta de validación |
+| Aprobado | Cuando el validador aprueba | Avanzar a Bases, Destinatarios y Envío |
+| Enviado | Cuando se registra el envío | Solo consultar. No se puede volver a enviar |
+
+En el panel, el filtro *Borradores* agrupa los borradores y los que tienen
+observaciones, porque ambos siguen en manos de la coordinadora.
+
+#### Horarios sugeridos
+
+Se proponen al elegir la fecha, y siempre se pueden editar.
+
+| País | Lunes a viernes | Sábado |
+|---|---|---|
+| Chile | 18:00 a 22:00 hrs | 09:00 a 13:00 hrs |
+| Argentina | 18:00 a 22:00 hrs | 09:00 a 13:00 hrs |
+| México | 15:00 a 19:00 hrs | 06:00 a 10:00 hrs |
+| Colombia | 16:00 a 20:00 hrs | 07:00 a 11:00 hrs |
+
+#### Orden de los motivos de exclusión
+
+Cada contacto queda fuera por un solo motivo: el primero que se cumpla, en este
+orden.
+
+| Orden | Motivo | Cuándo |
+|---|---|---|
+| 1 | Profesor · Gestor · Monitor · Rol no habilitado | El archivo trae rol y no es estudiante |
+| 2 | Correo inválido | El correo no tiene formato de correo |
+| 3 | Excluido a mano | La coordinadora lo sacó de la lista |
+| 4 | Duplicado | El correo ya apareció antes. Se conserva la primera aparición |
+
+#### Archivo `destinatarios.csv` para Yamm
+
+Solo trae a los incluidos, una fila por persona, en UTF-8 para que Excel muestre
+bien los acentos.
+
+| Columna | Contenido |
+|---|---|
+| Nombre | Nombre del estudiante |
+| Apellidos | Apellidos |
+| Correo | Dirección a la que se envía |
+| Grupos | Tal como viene del aula virtual |
+| Origen | Archivo del que se cargó el contacto |
+| País | País o países asignados a ese archivo |
+| Rol | Tal como viene del aula virtual, si viene |
+
+Las tres primeras columnas no cambian de orden, porque la plantilla de Yamm las
+lee por posición.
+
+#### Catálogos
+
+Listas locales de los desplegables. Todas aceptan escribir otro valor.
+
+- **Solicitantes:** Coordinación Académica, Equipo Académico, Dirección de
+  Programas.
+- **Docentes:** Mg. Ps. Daniela Ibacache, Mg. Ps. Hermann Thomas Ehrenfeld,
+  Mg. Ps. Jonathan Martínez, Mg. Ps. Nicolás Lorenzini.
+- **Programas**, filtrados por el tipo elegido:
+  - *Acreditaciones:* ADI-R y ADOS-2 (Acreditación Oficial Clínica Internacional).
+  - *Diplomados:* Trastornos de la Conducta Alimentaria (TCA); Psicoterapia Breve
+    en Adultos; Psicología Jurídica y Forense.
+  - *Cursos:* Trauma complejo en adolescencia y adultez; Escala WISC-V;
+    Neurociencias de los vínculos afectivos.
+  - *Postítulos:* Especialización en Trauma Complejo.
+
 ---
 
 ## Reglas de negocio
