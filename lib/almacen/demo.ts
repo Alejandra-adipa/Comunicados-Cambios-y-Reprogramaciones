@@ -215,6 +215,7 @@ ${FIRMA}`,
         "Neurociencias de los vínculos afectivos y las relaciones de pareja: claves para la evaluación e intervención clínica",
       docenteSaliente: "Mg. Ps. Jonathan Martínez",
       docenteEntrante: "Mg. Ps. Nicolás Lorenzini",
+      fechaEfectiva: "2026-09-21",
     },
   };
 

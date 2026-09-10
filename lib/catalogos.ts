@@ -32,21 +32,25 @@ export function esPais(k: string): k is PaisKey {
 export const PROGRAMAS = {
   curso: {
     nombre: "Curso",
+    femenino: false,
     desc: "Actualización puntual, sin estructura de módulos.",
     pideModulo: false,
   },
   diplomado: {
     nombre: "Diplomado",
+    femenino: false,
     desc: "Programa modular secuencial.",
     pideModulo: true,
   },
   acreditacion: {
     nombre: "Acreditación",
+    femenino: true,
     desc: "Habilitación en un instrumento específico.",
     pideModulo: false,
   },
   postitulo: {
     nombre: "Postítulo",
+    femenino: false,
     desc: "Especialización avanzada, modular.",
     pideModulo: true,
   },

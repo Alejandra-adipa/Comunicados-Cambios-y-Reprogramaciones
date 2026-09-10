@@ -17,6 +17,12 @@ export function fechaLarga(v: unknown): string {
   return `${dia} ${d.getDate()} de ${mes}`;
 }
 
+/** ", a partir del jueves 12 de junio," o nada si falta la fecha. */
+function desdeFecha(v: unknown): string {
+  const f = fechaLarga(v);
+  return f ? `, a partir del ${f},` : "";
+}
+
 /** ["Lun","Mié"] -> "lunes y miércoles". */
 export function diasLargos(v: unknown): string {
   const mapa: Record<string, string> = {
@@ -158,8 +164,23 @@ function nombrePrograma(ctx: ContextoComunicado): string {
 function saludo(ctx: ContextoComunicado): string {
   const nombre = nombrePrograma(ctx);
   if (!nombre) return "Estimadas y estimados estudiantes:";
-  const programa = PROGRAMAS[ctx.programa].nombre.toLowerCase();
-  return `Estimadas y estimados participantes del ${programa} "${nombre}":`;
+  return `Estimadas y estimados participantes ${delPrograma(ctx)} "${nombre}":`;
+}
+
+/** "el diplomado", "la acreditación": el artículo sigue al tipo de programa. */
+function elPrograma(ctx: ContextoComunicado): string {
+  const p = PROGRAMAS[ctx.programa];
+  return `${p.femenino ? "la" : "el"} ${p.nombre.toLowerCase()}`;
+}
+
+/** "del diplomado", "de la acreditación". */
+function delPrograma(ctx: ContextoComunicado): string {
+  return elPrograma(ctx).replace(/^el /, "del ").replace(/^la /, "de la ");
+}
+
+/** "de" + fechas que ya traen su artículo: "de el viernes" se contrae a "del viernes". */
+function deFechas(fechas: string): string {
+  return `de ${fechas}`.replace(/^de el /, "del ");
 }
 
 const APERTURA = "Junto con saludar cordialmente, esperamos que se encuentren muy bien.";
@@ -237,7 +258,7 @@ export function plantilla(ctx: ContextoComunicado): SalidaIA {
         cuerpo: parrafos(
           saludo(ctx),
           APERTURA,
-          `Les escribimos para informar una modificación en la programación ${alInicio ? `del inicio del ${programa}` : `de las clases${clase}`}.`,
+          `Les escribimos para informar una modificación en la programación ${alInicio ? `del inicio ${delPrograma(ctx)}` : `de las clases${clase}`}.`,
           originales
             ? `Por motivos de fuerza mayor, ${txt(ctx, "docente") || "la docente a cargo"} no podrá dictar ${varias ? "las sesiones originalmente programadas" : "la sesión originalmente programada"} para ${originales}.`
             : "",
@@ -261,7 +282,7 @@ export function plantilla(ctx: ContextoComunicado): SalidaIA {
         cuerpo: parrafos(
           saludo(ctx),
           APERTURA,
-          `Les informamos que, a partir del ${fechaLarga(ctx.datos.fechaEfectiva)}, ${alInicio ? `el ${programa}` : `las clases${clase}`} estará${alInicio ? "" : "n"} a cargo de ${entrante}, quien reemplaza a ${txt(ctx, "docenteSaliente")}.`,
+          `Les informamos que${desdeFecha(ctx.datos.fechaEfectiva)} ${alInicio ? elPrograma(ctx) : `las clases${clase}`} estará${alInicio ? "" : "n"} a cargo de ${entrante}, quien reemplaza a ${txt(ctx, "docenteSaliente")}.`,
           `${perfil ? `${perfil} ` : ""}La planificación, las evaluaciones y el horario se mantienen sin cambios.`,
           zoom,
           cierre(ctx),
@@ -277,7 +298,7 @@ export function plantilla(ctx: ContextoComunicado): SalidaIA {
         cuerpo: parrafos(
           saludo(ctx),
           APERTURA,
-          `Les informamos que ${varias ? "las clases" : "la clase"}${clase}${suspendidas ? ` de ${suspendidas}` : ""}${horario ? `, ${horario},` : ""} ${varias ? "han sido suspendidas" : "ha sido suspendida"} por ${txt(ctx, "motivoPublico")}.`,
+          `Les informamos que ${varias ? "las clases" : "la clase"}${clase}${suspendidas ? ` ${deFechas(suspendidas)}` : ""}${horario ? `, ${horario},` : ""} ${varias ? "han sido suspendidas" : "ha sido suspendida"} por ${txt(ctx, "motivoPublico")}.`,
           calendario(ctx, false) && varias
             ? `Sesiones suspendidas:\n\n${calendario(ctx, false)}`
             : tabla,
@@ -296,7 +317,7 @@ export function plantilla(ctx: ContextoComunicado): SalidaIA {
         cuerpo: parrafos(
           saludo(ctx),
           APERTURA,
-          `Les informamos que, a partir del ${fechaLarga(ctx.datos.vigenciaDesde)}, ${alInicio ? `el ${programa}` : `las clases${clase}`} cambia${alInicio ? "" : "n"} de horario. Las sesiones, que se dictaban de ${txt(ctx, "horarioAnterior")}, se realizarán ${nuevo}${dias ? ` los días ${dias}` : ""}.`,
+          `Les informamos que${desdeFecha(ctx.datos.vigenciaDesde)} ${alInicio ? elPrograma(ctx) : `las clases${clase}`} cambia${alInicio ? "" : "n"} de horario. Las sesiones, que se dictaban de ${txt(ctx, "horarioAnterior")}, se realizarán ${nuevo}${dias ? ` los días ${dias}` : ""}.`,
           tabla,
           `El cambio se mantiene por el resto del período y ${alInicio ? "el programa continúa" : "las clases continúan"} a cargo de ${txt(ctx, "docente")}. ${zoom}`,
           cierre(ctx),
