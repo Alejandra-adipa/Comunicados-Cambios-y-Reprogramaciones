@@ -32,12 +32,24 @@ export async function POST(req: Request) {
     if (typeof horariosCrudos[p] === "string") horarios[p] = horariosCrudos[p];
   }
 
+  const clases = Array.isArray(crudo.clases)
+    ? crudo.clases.map((c) => {
+        const x = (c ?? {}) as Record<string, unknown>;
+        return {
+          numero: String(x.numero ?? ""),
+          fechaOriginal: String(x.fechaOriginal ?? ""),
+          fechaNueva: String(x.fechaNueva ?? ""),
+        };
+      })
+    : [];
+
   const zoom = (crudo.zoom ?? {}) as Record<string, unknown>;
 
   const ctx: ContextoComunicado = {
     tipo,
     programa,
     alcance: crudo.alcance === "inicio" ? "inicio" : "clase",
+    clases,
     paises: paises.length > 0 ? paises : ["cl"],
     horarios,
     datos: (crudo.datos ?? {}) as Record<string, string | string[]>,

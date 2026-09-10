@@ -29,6 +29,25 @@ export type ArchivoBase = {
   cargado: string;
 };
 
+/**
+ * Una clase concreta afectada por el comunicado.
+ *
+ * Es una lista porque un cambio rara vez toca una sola sesión: mover la clase 2
+ * suele arrastrar la 3 y la 4, cada una con su propia fecha. Qué fechas se piden
+ * lo decide el tipo de comunicado.
+ */
+export type ClaseAfectada = {
+  numero: string;
+  /** Fecha en que estaba programada. */
+  fechaOriginal: string;
+  /** Fecha a la que se mueve. Vacía cuando el tipo no reprograma. */
+  fechaNueva: string;
+};
+
+export function claseVacia(): ClaseAfectada {
+  return { numero: "", fechaOriginal: "", fechaNueva: "" };
+}
+
 export type RespuestaValidacion = "aprobado" | "observaciones";
 
 /** Una vuelta del ciclo de validación. */
@@ -64,8 +83,10 @@ export type Solicitud = {
   tipo: TipoKey;
   /** Dónde ocurre: define campos y validador. */
   programa: ProgramaKey;
-  /** Solo para Curso: si el comunicado habla del inicio o de una clase puntual. */
+  /** Si el comunicado habla del inicio del programa o de clases puntuales. */
   alcance: "inicio" | "clase";
+  /** Clases afectadas, cuando el alcance es "clase". */
+  clases: ClaseAfectada[];
   /** Países que reciben el comunicado. */
   paises: PaisKey[];
   /**
@@ -116,6 +137,7 @@ export function solicitudNueva(
     tipo,
     programa,
     alcance: "clase",
+    clases: [claseVacia()],
     paises: ["cl"],
     horarios: {},
     solicitante: "",
@@ -162,6 +184,37 @@ function paisesDe(x: Record<string, unknown>): PaisKey[] {
 }
 
 /**
+ * Clases afectadas.
+ *
+ * Antes había una sola clase y sus fechas vivían sueltas en `datos`. Si el
+ * registro viene de esa época se arma una entrada con lo que tenga, para que el
+ * comunicado siga diciendo lo mismo que decía.
+ */
+function clasesDe(v: Record<string, unknown>): ClaseAfectada[] {
+  if (Array.isArray(v.clases)) {
+    const lista = v.clases.map((c) => {
+      const x = (c ?? {}) as Record<string, unknown>;
+      return {
+        numero: texto(x.numero),
+        fechaOriginal: texto(x.fechaOriginal),
+        fechaNueva: texto(x.fechaNueva),
+      };
+    });
+    if (lista.length > 0) return lista;
+  }
+
+  const d = (v.datos ?? {}) as Record<string, unknown>;
+  const suelta: ClaseAfectada = {
+    numero: texto(d.claseNumero),
+    // `fecha` era el campo de la suspensión; `fechaOriginal`, el de la reprogramación.
+    fechaOriginal: texto(d.fechaOriginal) || texto(d.fecha),
+    fechaNueva: texto(d.fechaNueva),
+  };
+  const tieneAlgo = suelta.numero || suelta.fechaOriginal || suelta.fechaNueva;
+  return tieneAlgo ? [suelta] : [claseVacia()];
+}
+
+/**
  * Completa un registro guardado antes de que existieran los campos nuevos.
  *
  * Se aplica al leer de disco, así que los comunicados creados con versiones
@@ -195,6 +248,7 @@ export function normalizar(crudo: unknown): Solicitud {
     tipo: esTipoValido(tipo) ? tipo : base.tipo,
     programa: esPrograma(programa) ? programa : base.programa,
     alcance: v.alcance === "inicio" ? "inicio" : "clase",
+    clases: clasesDe(v),
     paises: paises.length > 0 ? paises : base.paises,
     horarios,
 
@@ -273,4 +327,41 @@ export function normalizar(crudo: unknown): Solicitud {
       total: typeof envio.total === "number" ? envio.total : undefined,
     },
   };
+}
+
+/* ------------------------------------------------------ plantillas propias */
+
+/**
+ * Una plantilla guardada por el equipo.
+ *
+ * Es el lugar donde viven los borradores que hoy se copian a mano desde la
+ * bandeja de info@adipa: se pegan una vez acá y quedan disponibles para
+ * cualquier comunicado, sin volver a buscar el correo antiguo.
+ */
+export type PlantillaGuardada = {
+  id: string;
+  nombre: string;
+  /** Tipo al que pertenece, o vacío si sirve para cualquiera. */
+  tipo: TipoKey | "";
+  asunto: string;
+  cuerpo: string;
+  creada: string;
+};
+
+export function normalizarPlantillas(crudo: unknown): PlantillaGuardada[] {
+  if (!Array.isArray(crudo)) return [];
+  return crudo
+    .map((p) => {
+      const x = (p ?? {}) as Record<string, unknown>;
+      const tipo = texto(x.tipo);
+      return {
+        id: texto(x.id),
+        nombre: texto(x.nombre),
+        tipo: esTipoValido(tipo) ? tipo : ("" as const),
+        asunto: texto(x.asunto),
+        cuerpo: texto(x.cuerpo),
+        creada: texto(x.creada, new Date().toISOString()),
+      };
+    })
+    .filter((p) => p.id && p.nombre);
 }

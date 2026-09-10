@@ -1,6 +1,8 @@
 import { FIRMA } from "../referencias";
 import { PAISES, PROGRAMAS } from "../catalogos";
 import { TIPOS } from "../tipos";
+import { CORREO } from "../envio/provider";
+import type { ClaseAfectada } from "../modelo";
 import type { ContextoComunicado, SalidaIA } from "./provider";
 
 /** "2026-06-12" -> "jueves 12 de junio". Devuelve el texto crudo si no parsea. */
@@ -32,7 +34,33 @@ export function diasLargos(v: unknown): string {
   return `${nombres.slice(0, -1).join(", ")} y ${nombres[nombres.length - 1]}`;
 }
 
+/** Une con comas y una "y" final: "el 8, el 9 y el 10 de septiembre". */
+function enumerar(partes: string[]): string {
+  const limpias = partes.filter(Boolean);
+  if (limpias.length === 0) return "";
+  if (limpias.length === 1) return limpias[0];
+  return `${limpias.slice(0, -1).join(", ")} y ${limpias[limpias.length - 1]}`;
+}
+
 const txt = (ctx: ContextoComunicado, k: string) => String(ctx.datos[k] ?? "").trim();
+
+/* ------------------------------------------------------------------ clases */
+
+/** Clases con algún dato cargado. Las filas en blanco no llegan al comunicado. */
+export function clasesUtiles(ctx: ContextoComunicado): ClaseAfectada[] {
+  if (ctx.alcance === "inicio") return [];
+  return ctx.clases.filter((c) => c.numero || c.fechaOriginal || c.fechaNueva);
+}
+
+/** La fecha que manda para sugerir horarios: la nueva si existe, si no la original. */
+export function fechaDeReferencia(ctx: ContextoComunicado): string {
+  const clave = TIPOS[ctx.tipo].fechaClave;
+  if (clave) return txt(ctx, clave);
+  const primera = clasesUtiles(ctx)[0];
+  return primera ? primera.fechaNueva || primera.fechaOriginal : "";
+}
+
+/* ---------------------------------------------------------------- horarios */
 
 /**
  * Horario en hora local de cada país.
@@ -50,6 +78,15 @@ export function horarioEnLinea(ctx: ContextoComunicado): string {
   return "en el horario que corresponde a su país";
 }
 
+function lineasHorario(ctx: ContextoComunicado): string[] {
+  const conHorario = ctx.paises.filter((p) => (ctx.horarios[p] ?? "").trim());
+  if (conHorario.length === 1) {
+    const p = conHorario[0];
+    return [`${ctx.horarios[p]} · hora de ${PAISES[p].nombre}`];
+  }
+  return conHorario.map((p) => `${PAISES[p].nombre}: ${ctx.horarios[p]}`);
+}
+
 export function bloqueHorarios(ctx: ContextoComunicado): string {
   const conHorario = ctx.paises.filter((p) => (ctx.horarios[p] ?? "").trim());
   if (conHorario.length < 2) return "";
@@ -57,13 +94,46 @@ export function bloqueHorarios(ctx: ContextoComunicado): string {
   return `Horario según su país:\n${lineas.join("\n")}`;
 }
 
+/**
+ * Calendario actualizado: una entrada por clase, con su fecha y su horario.
+ *
+ * Es el bloque que evita el malentendido más caro de estos comunicados. Cuando
+ * se mueven varias sesiones, decirlo en prosa obliga al estudiante a cruzar
+ * fechas; en lista, cada clase se lee sola.
+ */
+export function calendario(ctx: ContextoComunicado, usarFechaNueva: boolean): string {
+  const clases = clasesUtiles(ctx);
+  if (clases.length === 0) return "";
+
+  const horas = lineasHorario(ctx);
+  const bloques = clases.map((c) => {
+    const fecha = usarFechaNueva ? c.fechaNueva || c.fechaOriginal : c.fechaOriginal;
+    const lineas = [c.numero ? `Clase ${c.numero}` : "Sesión"];
+    if (fecha) lineas.push(fechaLarga(fecha));
+    lineas.push(...horas);
+    return lineas.join("\n");
+  });
+
+  return bloques.join("\n\n");
+}
+
+/** "el jueves 17, el viernes 18 y el sábado 19 de septiembre" */
+function fechasDe(clases: ClaseAfectada[], campo: "fechaOriginal" | "fechaNueva"): string {
+  // Cada fecha lleva su propio artículo: "el jueves 17 y el viernes 18" se lee
+  // mejor que "el jueves 17 y viernes 18".
+  const fechas = clases.map((c) => fechaLarga(c[campo])).filter(Boolean);
+  return enumerar(fechas.map((f) => `el ${f}`));
+}
+
+/* ------------------------------------------------------------------- zoom */
+
 /** Datos de conexión, o la indicación de que el enlace de siempre sigue válido. */
 export function bloqueZoom(ctx: ContextoComunicado): string {
   // Una reunión informativa siempre tiene su propia sala: no hay "enlace de
   // siempre" al que remitir, aunque la casilla diga que se mantiene.
   const publicarDatos = TIPOS[ctx.tipo].zoomSiempre || !ctx.zoomSeMantiene;
   if (!publicarDatos) {
-    return "El enlace de acceso es el mismo que utiliza habitualmente y lo encontrará disponible en su aula virtual.";
+    return "Los accesos se mantienen sin cambios: el enlace es el mismo que utilizan habitualmente y lo encontrarán disponible en su aula virtual.";
   }
   const { link, id, codigo } = ctx.zoom;
   const lineas = ["Los datos de conexión son los siguientes:"];
@@ -73,23 +143,53 @@ export function bloqueZoom(ctx: ContextoComunicado): string {
   return lineas.length > 1 ? lineas.join("\n") : "";
 }
 
-/** "del módulo 3, Evaluación Neurocognitiva (clase 2)" o cadena vacía. */
+/* --------------------------------------------------------- encabezado y pie */
+
+/** Nombre del programa tal como se nombra en el comunicado. */
+function nombrePrograma(ctx: ContextoComunicado): string {
+  return String(ctx.datos.nombrePrograma ?? ctx.datos.asignatura ?? "").trim();
+}
+
+/**
+ * Saludo. Cuando se conoce el programa se lo nombra, que es como se escriben
+ * hoy estos correos: el estudiante sabe de inmediato de cuál de sus programas
+ * le están hablando.
+ */
+function saludo(ctx: ContextoComunicado): string {
+  const nombre = nombrePrograma(ctx);
+  if (!nombre) return "Estimadas y estimados estudiantes:";
+  const programa = PROGRAMAS[ctx.programa].nombre.toLowerCase();
+  return `Estimadas y estimados participantes del ${programa} "${nombre}":`;
+}
+
+const APERTURA = "Junto con saludar cordialmente, esperamos que se encuentren muy bien.";
+
+const cierre = `En caso de tener dudas o requerir apoyo, pueden responder directamente a este correo o escribirnos a ${CORREO.responderA}.
+
+${FIRMA}`;
+
+/** "del módulo 3, Evaluación e intervención" o cadena vacía. */
 export function referenciaClase(ctx: ContextoComunicado): string {
   const partes: string[] = [];
   const modulo = txt(ctx, "moduloNumero");
   const nombreModulo = txt(ctx, "moduloNombre");
-  const clase = txt(ctx, "claseNumero");
 
   if (PROGRAMAS[ctx.programa].pideModulo && modulo) {
     partes.push(nombreModulo ? `módulo ${modulo}, ${nombreModulo}` : `módulo ${modulo}`);
   }
-  if (clase && !(ctx.programa === "curso" && ctx.alcance === "inicio")) {
-    partes.push(`clase ${clase}`);
-  }
+
+  const clases = clasesUtiles(ctx)
+    .map((c) => c.numero)
+    .filter(Boolean);
+  if (clases.length === 1) partes.push(`clase ${clases[0]}`);
+  else if (clases.length > 1) partes.push(`clases ${enumerar(clases)}`);
+
   return partes.length > 0 ? ` (${partes.join(" · ")})` : "";
 }
 
 const parrafos = (...bloques: string[]) => bloques.filter((b) => b.trim()).join("\n\n");
+
+/* -------------------------------------------------------------- plantillas */
 
 /**
  * Borrador base a partir de los datos del formulario.
@@ -99,38 +199,54 @@ const parrafos = (...bloques: string[]) => bloques.filter((b) => b.trim()).join(
  * El campo `motivo` nunca entra acá: es contexto interno.
  */
 export function plantilla(ctx: ContextoComunicado): SalidaIA {
-  const cierre = `Quedamos atentos a cualquier consulta a través de este mismo correo.\n\n${FIRMA}`;
-  const saludo = "Estimado/a estudiante:";
+  const nombre = nombrePrograma(ctx);
+  const programa = PROGRAMAS[ctx.programa].nombre.toLowerCase();
   const horario = horarioEnLinea(ctx);
   const tabla = bloqueHorarios(ctx);
   const zoom = bloqueZoom(ctx);
   const clase = referenciaClase(ctx);
+  const clases = clasesUtiles(ctx);
+  const alInicio = ctx.alcance === "inicio";
 
   switch (ctx.tipo) {
     case "reprogramacion": {
-      const asig = txt(ctx, "asignatura") || "la asignatura";
+      const originales = fechasDe(clases, "fechaOriginal");
+      const nuevas = fechasDe(clases, "fechaNueva");
+      const varias = clases.length > 1;
+
       return {
-        asunto: `Reprogramación de la clase de ${asig} del ${fechaLarga(ctx.datos.fechaOriginal)}`,
+        asunto: alInicio
+          ? `Actualización de la fecha de inicio de tu ${programa}`
+          : `Reprogramación de ${varias ? "clases" : "la clase"} de ${nombre || "tu programa"}`,
         cuerpo: parrafos(
-          saludo,
-          `Junto con saludar, le informamos que la clase de ${asig}${clase}, programada para el ${fechaLarga(ctx.datos.fechaOriginal)}, ha sido reprogramada para el ${fechaLarga(ctx.datos.fechaNueva)}${horario ? `, ${horario}` : ""}.`,
-          tabla,
-          `La sesión se mantiene a cargo de ${txt(ctx, "docente")}. ${zoom}`,
-          `Agradecemos su comprensión. ${cierre}`,
+          saludo(ctx),
+          APERTURA,
+          `Les escribimos para informar una modificación en la programación ${alInicio ? `del inicio del ${programa}` : `de las clases${clase}`}.`,
+          originales
+            ? `Por motivos de fuerza mayor, ${txt(ctx, "docente") || "la docente a cargo"} no podrá dictar ${varias ? "las sesiones originalmente programadas" : "la sesión originalmente programada"} para ${originales}.`
+            : "",
+          nuevas
+            ? `Debido a lo anterior, ${varias ? "dichas sesiones serán reprogramadas" : "dicha sesión será reprogramada"} para ${nuevas}.`
+            : "",
+          calendario(ctx, true) ? "A continuación, les compartimos el calendario actualizado:" : "",
+          calendario(ctx, true),
+          zoom,
+          "Queremos expresar nuestras disculpas por este ajuste. Entendemos que una modificación de fechas puede afectar su planificación personal, laboral y académica, por lo que lamentamos las molestias y agradecemos su comprensión.",
+          cierre,
         ),
       };
     }
 
     case "cambio_docente": {
-      const asig = txt(ctx, "asignatura") || "la asignatura";
       const perfil = txt(ctx, "perfilEntrante");
       const entrante = txt(ctx, "docenteEntrante");
       return {
-        asunto: `Cambio de docente en la asignatura ${asig}`,
+        asunto: `Cambio de docente en ${nombre || "tu programa"}`,
         cuerpo: parrafos(
-          saludo,
-          `Junto con saludar, le informamos que a partir del ${fechaLarga(ctx.datos.fechaEfectiva)} la asignatura ${asig}${clase} será dictada por ${entrante}, quien reemplaza a ${txt(ctx, "docenteSaliente")}.`,
-          `${perfil ? `${perfil} ` : ""}La planificación, las evaluaciones y el horario de la asignatura se mantienen sin cambios.`,
+          saludo(ctx),
+          APERTURA,
+          `Les informamos que, a partir del ${fechaLarga(ctx.datos.fechaEfectiva)}, ${alInicio ? `el ${programa}` : `las clases${clase}`} estará${alInicio ? "" : "n"} a cargo de ${entrante}, quien reemplaza a ${txt(ctx, "docenteSaliente")}.`,
+          `${perfil ? `${perfil} ` : ""}La planificación, las evaluaciones y el horario se mantienen sin cambios.`,
           zoom,
           cierre,
         ),
@@ -138,31 +254,35 @@ export function plantilla(ctx: ContextoComunicado): SalidaIA {
     }
 
     case "suspension": {
-      const asig = txt(ctx, "asignatura") || "la asignatura";
+      const suspendidas = fechasDe(clases, "fechaOriginal");
+      const varias = clases.length > 1;
       return {
-        asunto: `Suspensión de la clase de ${asig} del ${fechaLarga(ctx.datos.fecha)}`,
+        asunto: `Suspensión de ${varias ? "clases" : "la clase"} de ${nombre || "tu programa"}`,
         cuerpo: parrafos(
-          saludo,
-          `Junto con saludar, le informamos que la clase de ${asig}${clase} del ${fechaLarga(ctx.datos.fecha)}${horario ? `, ${horario}` : ""}, ha sido suspendida por ${txt(ctx, "motivoPublico")}.`,
-          tabla,
+          saludo(ctx),
+          APERTURA,
+          `Les informamos que ${varias ? "las clases" : "la clase"}${clase}${suspendidas ? ` de ${suspendidas}` : ""}${horario ? `, ${horario},` : ""} ${varias ? "han sido suspendidas" : "ha sido suspendida"} por ${txt(ctx, "motivoPublico")}.`,
+          calendario(ctx, false) && varias
+            ? `Sesiones suspendidas:\n\n${calendario(ctx, false)}`
+            : tabla,
           txt(ctx, "recuperacion"),
-          `Lamentamos los inconvenientes y agradecemos su comprensión.`,
+          "Lamentamos los inconvenientes y agradecemos su comprensión.",
           cierre,
         ),
       };
     }
 
     case "cambio_horario": {
-      const asig = txt(ctx, "asignatura") || "la asignatura";
       const dias = diasLargos(ctx.datos.dias);
       const nuevo = horario || "en el horario informado";
       return {
-        asunto: `Nuevo horario de la asignatura ${asig}`,
+        asunto: `Nuevo horario de ${nombre || "tu programa"}`,
         cuerpo: parrafos(
-          saludo,
-          `Junto con saludar, le informamos que a partir del ${fechaLarga(ctx.datos.vigenciaDesde)} la asignatura ${asig}${clase} cambia su horario. Las sesiones, que se dictaban de ${txt(ctx, "horarioAnterior")}, se realizarán ${nuevo}${dias ? ` los días ${dias}` : ""}.`,
+          saludo(ctx),
+          APERTURA,
+          `Les informamos que, a partir del ${fechaLarga(ctx.datos.vigenciaDesde)}, ${alInicio ? `el ${programa}` : `las clases${clase}`} cambia${alInicio ? "" : "n"} de horario. Las sesiones, que se dictaban de ${txt(ctx, "horarioAnterior")}, se realizarán ${nuevo}${dias ? ` los días ${dias}` : ""}.`,
           tabla,
-          `El cambio se mantiene por el resto del período y la asignatura continúa a cargo de ${txt(ctx, "docente")}. ${zoom}`,
+          `El cambio se mantiene por el resto del período y ${alInicio ? "el programa continúa" : "las clases continúan"} a cargo de ${txt(ctx, "docente")}. ${zoom}`,
           cierre,
         ),
       };
@@ -174,16 +294,17 @@ export function plantilla(ctx: ContextoComunicado): SalidaIA {
      * exactamente igual.
      */
     case "reunion_informativa": {
-      const programa = txt(ctx, "nombrePrograma") || "el programa";
       return {
-        asunto: `Reunión informativa de ${programa} · ${fechaLarga(ctx.datos.fechaSesion)}`,
+        asunto: `Reunión informativa de ${nombre || "tu programa"} · ${fechaLarga(ctx.datos.fechaSesion)}`,
         cuerpo: parrafos(
-          saludo,
-          `Junto con saludar, le invitamos a la reunión informativa de ${programa}, que se realizará el ${fechaLarga(ctx.datos.fechaSesion)}${horario ? `, ${horario}` : ""}.`,
+          saludo(ctx),
+          APERTURA,
+          `Les invitamos a la reunión informativa de ${nombre || "el programa"}, que se realizará el ${fechaLarga(ctx.datos.fechaSesion)}${horario ? `, ${horario}` : ""}.`,
           tabla,
-          "En esta sesión revisaremos la organización del programa, la modalidad de trabajo y los aspectos prácticos que necesita conocer antes de comenzar. Habrá un espacio final para responder sus consultas.",
+          "En esta sesión revisaremos la organización del programa, la modalidad de trabajo y los aspectos prácticos que necesitan conocer antes de comenzar. Habrá un espacio final para responder sus consultas.",
           zoom,
-          `Le recomendamos conectarse unos minutos antes del inicio. ${cierre}`,
+          "Les recomendamos conectarse unos minutos antes del inicio.",
+          cierre,
         ),
       };
     }
@@ -192,13 +313,13 @@ export function plantilla(ctx: ContextoComunicado): SalidaIA {
       const accion = txt(ctx, "accion");
       const limite = txt(ctx, "fechaLimite");
       const parrafoAccion = accion
-        ? `Le solicitamos ${accion.charAt(0).toLowerCase()}${accion.slice(1)}${limite ? `, a más tardar el ${fechaLarga(limite)}` : ""}.`
+        ? `Les solicitamos ${accion.charAt(0).toLowerCase()}${accion.slice(1)}${limite ? `, a más tardar el ${fechaLarga(limite)}` : ""}.`
         : "";
       return {
-        asunto: txt(ctx, "tema") || "Aviso importante",
+        asunto: txt(ctx, "tema") || "Información importante",
         cuerpo: parrafos(
-          saludo,
-          `Junto con saludar, le informamos lo siguiente sobre ${txt(ctx, "tema").toLowerCase()}.`,
+          saludo(ctx),
+          APERTURA,
           txt(ctx, "mensajeClave"),
           parrafoAccion,
           "Agradecemos su comprensión.",

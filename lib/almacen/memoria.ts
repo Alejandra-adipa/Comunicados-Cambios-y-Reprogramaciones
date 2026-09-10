@@ -1,4 +1,4 @@
-import type { Solicitud } from "../modelo";
+import type { PlantillaGuardada, Solicitud } from "../modelo";
 import { idValido, type Almacen } from "./tipos";
 import { solicitudesDemo } from "./demo";
 
@@ -15,6 +15,7 @@ import { solicitudesDemo } from "./demo";
  */
 
 let solicitudes: Map<string, Solicitud> | null = null;
+let plantillas: PlantillaGuardada[] = [];
 
 function datos(): Map<string, Solicitud> {
   if (!solicitudes) {
@@ -53,5 +54,13 @@ export const almacenMemoria: Almacen = {
 
   async borrar(id) {
     datos().delete(id);
+  },
+
+  async leerPlantillas() {
+    return plantillas.map((p) => ({ ...p }));
+  },
+
+  async guardarPlantillas(lista) {
+    plantillas = lista.map((p) => ({ ...p }));
   },
 };

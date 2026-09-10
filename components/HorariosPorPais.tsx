@@ -3,6 +3,8 @@
 import { ClockIcon } from "@phosphor-icons/react";
 import type { Solicitud } from "@/lib/modelo";
 import { PAISES, horarioSugerido, tablaHorarios } from "@/lib/catalogos";
+import { contextoDe } from "@/lib/contexto";
+import { fechaDeReferencia } from "@/lib/ia/plantillas";
 import { Tarjeta, Boton, Aviso } from "./ui";
 
 /**
@@ -17,14 +19,13 @@ export function HorariosPorPais({
   s,
   set,
   titulo,
-  fechaClave,
 }: {
   s: Solicitud;
   set: (parche: Partial<Solicitud>) => void;
   titulo: string;
-  fechaClave?: string;
 }) {
-  const fecha = fechaClave ? String(s.datos[fechaClave] ?? "") : "";
+  // La sugerencia depende del día: los sábados tienen su propia tabla.
+  const fecha = fechaDeReferencia(contextoDe(s));
   const tabla = tablaHorarios(fecha);
   const faltan = s.paises.filter((p) => !(s.horarios[p] ?? "").trim());
 

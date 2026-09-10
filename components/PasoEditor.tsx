@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import {
   BookOpenTextIcon,
   FileTextIcon,
+  FolderOpenIcon,
   SparkleIcon,
   StopCircleIcon,
 } from "@phosphor-icons/react";
@@ -14,6 +15,7 @@ import { plantilla } from "@/lib/ia/plantillas";
 import { contextoDe } from "@/lib/contexto";
 import { partir } from "@/lib/ia/provider";
 import { Tarjeta, Boton, Aviso, Etiqueta, Girador } from "./ui";
+import { BibliotecaPlantillas } from "./BibliotecaPlantillas";
 
 const hora = () => new Date().toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" });
 
@@ -21,6 +23,7 @@ export function PasoEditor({ s, set }: PropsPaso) {
   const [redactando, setRedactando] = useState(false);
   const [error, setError] = useState("");
   const [verReferencia, setVerReferencia] = useState(false);
+  const [verPlantillas, setVerPlantillas] = useState(false);
   const aborto = useRef<AbortController | null>(null);
 
   const referencia = REFERENCIAS[s.tipo];
@@ -117,7 +120,11 @@ export function PasoEditor({ s, set }: PropsPaso) {
           )}
           <Boton variante="secundario" onClick={usarPlantilla} disabled={redactando}>
             <FileTextIcon aria-hidden className="size-4" />
-            Usar plantilla
+            Usar plantilla del tipo
+          </Boton>
+          <Boton variante="secundario" onClick={() => setVerPlantillas((v) => !v)}>
+            <FolderOpenIcon aria-hidden className="size-4" />
+            {verPlantillas ? "Ocultar mis plantillas" : "Mis plantillas"}
           </Boton>
           <Boton variante="sutil" onClick={() => setVerReferencia((v) => !v)}>
             <BookOpenTextIcon aria-hidden className="size-4" />
@@ -182,6 +189,15 @@ export function PasoEditor({ s, set }: PropsPaso) {
           </p>
         )}
       </Tarjeta>
+
+      {verPlantillas && (
+        <BibliotecaPlantillas
+          s={s}
+          onUsar={(p) =>
+            escribir({ asunto: p.asunto || s.asunto, cuerpo: p.cuerpo, fuente: `${p.nombre} · ${hora()}` })
+          }
+        />
+      )}
 
       {verReferencia && (
         <Tarjeta titulo="Comunicado de referencia" hint={`${TIPOS[s.tipo].nombre} · ya enviado`}>

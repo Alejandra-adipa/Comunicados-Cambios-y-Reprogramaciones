@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { Solicitud } from "./modelo";
 import { solicitudNueva } from "./modelo";
+import type { PlantillaGuardada } from "./modelo";
 import type { TipoKey } from "./tipos";
 import type { ProgramaKey } from "./catalogos";
 import { almacenArchivos } from "./almacen/archivos";
@@ -75,4 +76,25 @@ export function crear(tipo: TipoKey, programa: ProgramaKey): Promise<Solicitud> 
     );
   }
   return guardar(solicitudNueva(randomUUID(), tipo, programa));
+}
+
+/* ------------------------------------------------------ plantillas propias */
+
+export function listarPlantillas(): Promise<PlantillaGuardada[]> {
+  return almacen.leerPlantillas();
+}
+
+export async function agregarPlantilla(
+  datos: Omit<PlantillaGuardada, "id" | "creada">,
+): Promise<PlantillaGuardada[]> {
+  const nueva: PlantillaGuardada = { ...datos, id: randomUUID(), creada: new Date().toISOString() };
+  const lista = [...(await almacen.leerPlantillas()), nueva];
+  await almacen.guardarPlantillas(lista);
+  return lista;
+}
+
+export async function borrarPlantilla(id: string): Promise<PlantillaGuardada[]> {
+  const lista = (await almacen.leerPlantillas()).filter((p) => p.id !== id);
+  await almacen.guardarPlantillas(lista);
+  return lista;
 }

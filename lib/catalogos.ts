@@ -25,30 +25,29 @@ export function esPais(k: string): k is PaisKey {
 
 /* --------------------------------------------------------------- programas */
 
+/**
+ * Cualquier programa puede comunicar el inicio o una clase puntual, así que el
+ * alcance se pregunta siempre. Lo que cambia por tipo es si hay módulos.
+ */
 export const PROGRAMAS = {
   curso: {
     nombre: "Curso",
     desc: "Actualización puntual, sin estructura de módulos.",
-    /** Un curso puede comunicar el inicio del programa o una clase puntual. */
-    pideAlcance: true,
     pideModulo: false,
   },
   diplomado: {
     nombre: "Diplomado",
     desc: "Programa modular secuencial.",
-    pideAlcance: false,
     pideModulo: true,
   },
   acreditacion: {
     nombre: "Acreditación",
     desc: "Habilitación en un instrumento específico.",
-    pideAlcance: false,
     pideModulo: false,
   },
   postitulo: {
     nombre: "Postítulo",
     desc: "Especialización avanzada, modular.",
-    pideAlcance: false,
     pideModulo: true,
   },
 } as const;
@@ -125,37 +124,43 @@ export function horarioSugerido(pais: PaisKey, fechaISO?: string): string {
 const SOLICITANTES = [
   "Coordinación Académica",
   "Equipo Académico",
-  "Camila Fuentes",
-  "Paula Riquelme",
-  "Rodrigo Peña",
+  "Dirección de Programas",
 ];
 
 const DOCENTES = [
-  "Andrea Lillo",
-  "Camila Fuentes",
-  "Jorge Salinas",
-  "Marcela Ibáñez",
-  "Marisol Carmona",
-  "Paulina Vergara",
-  "Rodrigo Peña",
+  "Mg. Ps. Daniela Ibacache",
+  "Mg. Ps. Hermann Thomas Ehrenfeld",
+  "Mg. Ps. Jonathan Martínez",
+  "Mg. Ps. Nicolás Lorenzini",
 ];
 
-const ASIGNATURAS = [
-  "Analítica de Datos",
-  "Contabilidad para no contadores",
-  "Derecho Laboral",
-  "Estadística Aplicada",
-  "Evaluación Neurocognitiva",
-  "Finanzas Corporativas",
-  "Fundamentos de Marketing Digital",
-  "Gestión de Personas",
-  "Neuropsicología del Desarrollo",
-  "Taller de Innovación",
-];
+/**
+ * Programas por tipo. El desplegable de "Programa o asignatura" muestra solo
+ * los del tipo elegido, que es como se buscan en la práctica.
+ */
+const PROGRAMAS_DISPONIBLES: Record<ProgramaKey, string[]> = {
+  acreditacion: [
+    "Acreditación Oficial Clínica Internacional ADI-R",
+    "Acreditación Oficial Clínica Internacional ADOS-2",
+  ],
+  diplomado: [
+    "Diplomado en Abordaje Multidisciplinario de los Trastornos de la Conducta Alimentaria (TCA)",
+    "Diplomado Internacional: Estrategias Clínicas en Psicoterapia Breve en Adultos",
+    "Diplomado en Psicología Jurídica y Forense: Una mirada desde la criminalística, criminología y el delito",
+  ],
+  curso: [
+    "Abordaje clínico en trauma complejo, trauma del desarrollo y microtrauma relacional en adolescencia y adultez",
+    "Certificación en Escala Wechsler de Inteligencia para Niños (WISC-V) - Nivel Inicial, Intermedio y Avanzado: Profundización Diagnóstica y Análisis de Casos",
+    "Neurociencias de los vínculos afectivos y las relaciones de pareja: claves para la evaluación e intervención clínica",
+  ],
+  postitulo: [
+    "Postítulo de Especialización en Trauma Complejo. La Complejidad del Trauma Complejo a través de las trayectorias vitales: Un modelo de complejidad integral de comprensión, evaluación e intervención",
+  ],
+};
 
 // TODO(moodle-monday): reemplazar por la consulta al sistema correspondiente.
 export const catalogos = {
   solicitantes: (): string[] => SOLICITANTES,
   docentes: (): string[] => DOCENTES,
-  asignaturas: (): string[] => ASIGNATURAS,
+  programas: (programa: ProgramaKey): string[] => PROGRAMAS_DISPONIBLES[programa],
 };

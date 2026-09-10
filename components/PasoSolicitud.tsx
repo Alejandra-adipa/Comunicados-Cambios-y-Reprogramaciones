@@ -10,18 +10,20 @@ import {
   PROGRAMA_KEYS,
   catalogos,
   type PaisKey,
+  type ProgramaKey,
 } from "@/lib/catalogos";
 import { Tarjeta, Aviso, Etiqueta } from "./ui";
 import { TarjetaOpcion } from "./NuevoComunicado";
 import { CampoCatalogo } from "./CampoCatalogo";
 import { HorariosPorPais } from "./HorariosPorPais";
+import { ClasesAfectadas } from "./ClasesAfectadas";
 
 /** Todo lo que falta para poder pasar a la redacción. */
 export function faltantes(s: Solicitud): string[] {
   const def = TIPOS[s.tipo];
   const pendientes: string[] = [];
 
-  for (const c of camposDe(s.tipo, s.programa, s.alcance)) {
+  for (const c of camposDe(s.tipo, s.programa)) {
     if (!c.req) continue;
     const v = s.datos[c.k];
     const vacio = Array.isArray(v) ? v.length === 0 : !String(v ?? "").trim();
@@ -29,6 +31,17 @@ export function faltantes(s: Solicitud): string[] {
   }
 
   if (s.paises.length === 0) pendientes.push("países afectados");
+
+  // Un comunicado sobre clases sin ninguna clase cargada saldría sin calendario.
+  if (def.clases && s.alcance === "clase") {
+    const utiles = s.clases.filter((c) => c.numero || c.fechaOriginal || c.fechaNueva);
+    if (utiles.length === 0) pendientes.push("al menos una clase afectada");
+    else if (def.clases.conFechaNueva && utiles.some((c) => !c.fechaNueva)) {
+      pendientes.push("la nueva fecha de cada clase");
+    } else if (def.clases.conFechaOriginal && utiles.some((c) => !c.fechaOriginal)) {
+      pendientes.push("la fecha de cada clase");
+    }
+  }
 
   if (def.horarios) {
     const sinHorario = s.paises.filter((p) => !(s.horarios[p] ?? "").trim());
@@ -62,7 +75,7 @@ export function advertencias(s: Solicitud): string[] {
 
 export function PasoSolicitud({ s, set }: PropsPaso) {
   const def = TIPOS[s.tipo];
-  const campos = camposDe(s.tipo, s.programa, s.alcance);
+  const campos = camposDe(s.tipo, s.programa);
   const pendientes = faltantes(s);
   const avisos = advertencias(s);
   const pideZoom = def.zoomSiempre || !s.zoomSeMantiene;
@@ -93,23 +106,21 @@ export function PasoSolicitud({ s, set }: PropsPaso) {
           ))}
         </div>
 
-        {PROGRAMAS[s.programa].pideAlcance && (
-          <div className="mt-4">
-            <p className="mb-1.5 text-sm font-semibold text-brand-navy">¿Sobre qué se comunica?</p>
-            <div className="flex flex-wrap gap-2">
-              <Pildora
-                activo={s.alcance === "inicio"}
-                onClick={() => set({ alcance: "inicio" })}
-                texto="Inicio del programa"
-              />
-              <Pildora
-                activo={s.alcance === "clase"}
-                onClick={() => set({ alcance: "clase" })}
-                texto="Clase específica"
-              />
-            </div>
+        <div className="mt-4">
+          <p className="mb-1.5 text-sm font-semibold text-brand-navy">¿Sobre qué se comunica?</p>
+          <div className="flex flex-wrap gap-2">
+            <Pildora
+              activo={s.alcance === "inicio"}
+              onClick={() => set({ alcance: "inicio" })}
+              texto="Inicio del programa"
+            />
+            <Pildora
+              activo={s.alcance === "clase"}
+              onClick={() => set({ alcance: "clase" })}
+              texto="Clases específicas"
+            />
           </div>
-        )}
+        </div>
       </Tarjeta>
 
       <Tarjeta titulo="Tipo de comunicado" hint="Cambiarlo cambia los campos de abajo">
@@ -150,6 +161,7 @@ export function PasoSolicitud({ s, set }: PropsPaso) {
               req: true,
             }}
             valor={s.solicitante}
+            programa={s.programa}
             onChange={(v) => set({ solicitante: String(v) })}
           />
           {campos.map((c) => (
@@ -157,15 +169,24 @@ export function PasoSolicitud({ s, set }: PropsPaso) {
               key={c.k}
               campo={c}
               valor={s.datos[c.k] ?? ""}
+              programa={s.programa}
               onChange={(v) => campo(c.k, v)}
             />
           ))}
         </div>
       </Tarjeta>
 
-      {def.horarios && (
-        <HorariosPorPais s={s} set={set} titulo={def.horarios} fechaClave={def.fechaClave} />
+      {def.clases && s.alcance === "clase" && (
+        <ClasesAfectadas
+          s={s}
+          set={set}
+          titulo={def.clases.titulo}
+          conFechaOriginal={def.clases.conFechaOriginal}
+          conFechaNueva={def.clases.conFechaNueva}
+        />
       )}
+
+      {def.horarios && <HorariosPorPais s={s} set={set} titulo={def.horarios} />}
 
       <Tarjeta
         titulo="Conexión a la sesión"
@@ -280,10 +301,12 @@ function Pildora({
 function CampoFormulario({
   campo: c,
   valor,
+  programa,
   onChange,
 }: {
   campo: Campo;
   valor: string | string[];
+  programa: ProgramaKey;
   onChange: (v: string | string[]) => void;
 }) {
   const ancho = c.t === "textarea" || c.t === "dias" ? "sm:col-span-2" : "";
@@ -303,7 +326,8 @@ function CampoFormulario({
       {c.cat ? (
         <CampoCatalogo
           id={id}
-          opciones={catalogos[c.cat]()}
+          // El catálogo de programas depende del tipo elegido arriba.
+          opciones={c.cat === "programas" ? catalogos.programas(programa) : catalogos[c.cat]()}
           valor={String(valor)}
           onChange={onChange}
         />

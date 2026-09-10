@@ -19,10 +19,18 @@ const fecha = (iso: string) =>
 export function PasoBases({ s, set }: PropsPaso) {
   /**
    * A qué países aplica el archivo que se está por subir.
-   * Empieza con todos los del comunicado, que es el caso más frecuente cuando
-   * un mismo listado sirve a más de un país.
+   *
+   * Arranca en el primer país que todavía no tiene listado, porque lo normal es
+   * un archivo por aula. Marcar varios sigue disponible para el caso en que un
+   * mismo listado sirva a más de un país, pero tiene que ser una decisión
+   * explícita: si viniera todo marcado por defecto, dos archivos distintos
+   * quedarían contados en todos los países.
    */
-  const [destino, setDestino] = useState<PaisKey[]>(s.paises);
+  const [destino, setDestino] = useState<PaisKey[]>(() => {
+    const sinArchivo = s.paises.find((p) => !s.archivos.some((a) => a.paises.includes(p)));
+    const inicial = sinArchivo ?? s.paises[0];
+    return inicial ? [inicial] : [];
+  });
   const [subiendo, setSubiendo] = useState(false);
   const [errores, setErrores] = useState<string[]>([]);
   const [arrastrando, setArrastrando] = useState(false);
@@ -202,7 +210,15 @@ export function PasoBases({ s, set }: PropsPaso) {
                 <tbody className="divide-y divide-line">
                   {resumen.map((r) => (
                     <tr key={r.pais}>
-                      <td className="py-2">{r.nombre}</td>
+                      <td className="py-2">
+                        <span className="block">{r.nombre}</span>
+                        <span className="block text-xs text-ink-subtle">
+                          {s.archivos
+                            .filter((a) => a.paises.includes(r.pais))
+                            .map((a) => a.nombre)
+                            .join(" · ") || "sin listado cargado"}
+                        </span>
+                      </td>
                       <td className="py-2 text-right tabular-nums">{r.cargados}</td>
                       <td className="py-2 text-right tabular-nums font-semibold text-brand-navy">
                         {r.incluidos}

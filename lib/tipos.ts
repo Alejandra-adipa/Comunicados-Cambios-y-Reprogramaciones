@@ -13,7 +13,7 @@ export const DIAS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"] as const;
 export type CampoTipo = "text" | "date" | "textarea" | "select" | "dias" | "numero";
 
 /** Catálogos disponibles para los campos con desplegable. */
-export type CatalogoKey = "solicitantes" | "docentes" | "asignaturas";
+export type CatalogoKey = "solicitantes" | "docentes" | "programas";
 
 export type Campo = {
   k: string;
@@ -39,6 +39,17 @@ export type DefinicionTipo = {
   horarios?: string;
   /** Campo de fecha que decide si se sugiere la tabla de semana o la de sábado. */
   fechaClave?: string;
+  /**
+   * Bloque de clases afectadas. Su ausencia significa que el comunicado no
+   * habla de sesiones concretas.
+   */
+  clases?: {
+    titulo: string;
+    /** Fecha en que la clase estaba programada. */
+    conFechaOriginal: boolean;
+    /** Fecha a la que se mueve. */
+    conFechaNueva: boolean;
+  };
   /** Los datos de conexión son parte del comunicado, no una excepción. */
   zoomSiempre?: boolean;
 };
@@ -55,21 +66,20 @@ const CATALOGO = {
   reprogramacion: {
     nombre: "Reprogramación de clase",
     desc: "La sesión se corre a otra fecha u horario.",
-    horarios: "Horario de la nueva sesión",
-    fechaClave: "fechaNueva",
+    horarios: "Horario de las nuevas sesiones",
+    clases: { titulo: "Clases que se reprograman", conFechaOriginal: true, conFechaNueva: true },
     campos: [
-      { k: "asignatura", l: "Asignatura", t: "text", cat: "asignaturas", req: true },
+      { k: "asignatura", l: "Programa o asignatura", t: "text", cat: "programas", req: true },
       { k: "docente", l: "Docente a cargo", t: "text", cat: "docentes", req: true },
-      { k: "fechaOriginal", l: "Fecha original", t: "date", req: true },
-      { k: "fechaNueva", l: "Nueva fecha", t: "date", req: true },
       MOTIVO_INTERNO,
     ],
   },
   cambio_docente: {
     nombre: "Cambio de docente",
     desc: "Otra persona asume el curso desde una fecha.",
+    clases: { titulo: "Clases afectadas", conFechaOriginal: false, conFechaNueva: false },
     campos: [
-      { k: "asignatura", l: "Asignatura", t: "text", cat: "asignaturas", req: true },
+      { k: "asignatura", l: "Programa o asignatura", t: "text", cat: "programas", req: true },
       { k: "docenteSaliente", l: "Docente saliente", t: "text", cat: "docentes", req: true },
       { k: "docenteEntrante", l: "Docente entrante", t: "text", cat: "docentes", req: true },
       {
@@ -85,12 +95,11 @@ const CATALOGO = {
   suspension: {
     nombre: "Suspensión de clase",
     desc: "La sesión no se dicta y se avisa la recuperación.",
-    horarios: "Horario de la sesión suspendida",
-    fechaClave: "fecha",
+    horarios: "Horario de las sesiones suspendidas",
+    clases: { titulo: "Clases suspendidas", conFechaOriginal: true, conFechaNueva: false },
     campos: [
-      { k: "asignatura", l: "Asignatura", t: "text", cat: "asignaturas", req: true },
+      { k: "asignatura", l: "Programa o asignatura", t: "text", cat: "programas", req: true },
       { k: "docente", l: "Docente a cargo", t: "text", cat: "docentes", req: true },
-      { k: "fecha", l: "Fecha suspendida", t: "date", req: true },
       {
         k: "motivoPublico",
         l: "Motivo que se comunica",
@@ -113,8 +122,9 @@ const CATALOGO = {
     desc: "El bloque del curso cambia de forma permanente.",
     horarios: "Horario nuevo",
     fechaClave: "vigenciaDesde",
+    clases: { titulo: "Clases afectadas", conFechaOriginal: false, conFechaNueva: false },
     campos: [
-      { k: "asignatura", l: "Asignatura", t: "text", cat: "asignaturas", req: true },
+      { k: "asignatura", l: "Programa o asignatura", t: "text", cat: "programas", req: true },
       { k: "docente", l: "Docente a cargo", t: "text", cat: "docentes", req: true },
       {
         k: "horarioAnterior",
@@ -189,11 +199,7 @@ const TIPOS_DE_CLASE: TipoKey[] = [
 ];
 
 /** Campos que aporta el tipo de programa: módulo, clase o alcance. */
-export function camposDePrograma(
-  tipo: TipoKey,
-  programa: ProgramaKey,
-  alcance: "inicio" | "clase",
-): Campo[] {
+export function camposDePrograma(tipo: TipoKey, programa: ProgramaKey): Campo[] {
   // La reunión informativa nombra el programa por su cuenta.
   if (tipo === "reunion_informativa") return [];
 
@@ -201,29 +207,22 @@ export function camposDePrograma(
   const def = PROGRAMAS[programa];
   const campos: Campo[] = [];
 
+  // El número de clase ya no vive acá: cada clase afectada tiene el suyo, con
+  // su fecha, en el bloque de clases.
   if (def.pideModulo) {
     campos.push(
       { k: "moduloNumero", l: "Número de módulo", t: "numero", ph: "3", req },
-      { k: "moduloNombre", l: "Nombre del módulo", t: "text", cat: "asignaturas", req },
-      { k: "claseNumero", l: "Número de clase", t: "numero", ph: "2", req },
+      { k: "moduloNombre", l: "Nombre del módulo", t: "text", ph: "Evaluación e intervención", req },
     );
-  }
-
-  if (def.pideAlcance && alcance === "clase") {
-    campos.push({ k: "claseNumero", l: "Número de clase", t: "numero", ph: "2", req });
   }
 
   return campos;
 }
 
 /** Lista completa y ordenada de campos del formulario. */
-export function camposDe(
-  tipo: TipoKey,
-  programa: ProgramaKey,
-  alcance: "inicio" | "clase",
-): Campo[] {
+export function camposDe(tipo: TipoKey, programa: ProgramaKey): Campo[] {
   const base = TIPOS[tipo].campos;
-  const dePrograma = camposDePrograma(tipo, programa, alcance);
+  const dePrograma = camposDePrograma(tipo, programa);
   // El motivo interno cierra siempre el formulario.
   const sinMotivo = base.filter((c) => !c.interno);
   const interno = base.filter((c) => c.interno);

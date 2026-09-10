@@ -1,4 +1,4 @@
-import type { Solicitud } from "../modelo";
+import type { PlantillaGuardada, Solicitud } from "../modelo";
 
 /**
  * Contrato del almacenamiento.
@@ -23,6 +23,10 @@ export interface Almacen {
   leer(id: string): Promise<Solicitud | null>;
   guardar(s: Solicitud): Promise<Solicitud>;
   borrar(id: string): Promise<void>;
+
+  /** Plantillas propias del equipo, guardadas para reutilizar. */
+  leerPlantillas(): Promise<PlantillaGuardada[]>;
+  guardarPlantillas(lista: PlantillaGuardada[]): Promise<void>;
 }
 
 /** Se distingue de "no existe" para no reportar un archivo dañado como faltante. */

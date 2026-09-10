@@ -66,6 +66,8 @@ export function solicitudesDemo(): Solicitud[] {
     creada: hace(2),
     actualizada: hace(0, 3),
     paso: 3,
+    alcance: "inicio",
+    clases: [],
     paises: ["cl", "ar", "mx"],
     horarios: {
       cl: "18:00 a 19:30 hrs",
@@ -74,7 +76,8 @@ export function solicitudesDemo(): Solicitud[] {
     },
     solicitante: "Coordinación Académica",
     datos: {
-      nombrePrograma: "Postítulo en Evaluación Neurocognitiva",
+      nombrePrograma:
+        "Postítulo de Especialización en Trauma Complejo. La Complejidad del Trauma Complejo a través de las trayectorias vitales: Un modelo de complejidad integral de comprensión, evaluación e intervención",
       fechaSesion: "2026-09-24",
       motivo: "Primera cohorte del programa, conviene alinear expectativas antes de partir.",
     },
@@ -84,10 +87,10 @@ export function solicitudesDemo(): Solicitud[] {
       id: "000 0000 0001",
       codigo: "482913",
     },
-    asunto: "Reunión informativa del Postítulo en Evaluación Neurocognitiva · jueves 24 de septiembre",
+    asunto: "Reunión informativa del Postítulo de Especialización en Trauma Complejo · jueves 24 de septiembre",
     cuerpo: `Estimado/a estudiante:
 
-Junto con saludar, le invitamos a la reunión informativa del Postítulo en Evaluación Neurocognitiva, que se realizará el jueves 24 de septiembre, en el horario que corresponde a su país.
+Junto con saludar, le invitamos a la reunión informativa del Postítulo de Especialización en Trauma Complejo, que se realizará el jueves 24 de septiembre, en el horario que corresponde a su país.
 
 Horario según su país:
 - Chile: 18:00 a 19:30 hrs
@@ -113,7 +116,7 @@ ${FIRMA}`,
         n: 1,
         enviado: hace(0, 3),
         validador: "Nicole Agüero",
-        asunto: "Reunión informativa del Postítulo en Evaluación Neurocognitiva · jueves 24 de septiembre",
+        asunto: "Reunión informativa del Postítulo de Especialización en Trauma Complejo · jueves 24 de septiembre",
         cuerpo: "…",
       },
     ],
@@ -124,29 +127,31 @@ ${FIRMA}`,
     creada: hace(5),
     actualizada: hace(1),
     paso: 5,
+    clases: [
+      { numero: "2", fechaOriginal: "2026-09-17", fechaNueva: "2026-09-24" },
+      { numero: "3", fechaOriginal: "2026-09-18", fechaNueva: "2026-09-25" },
+    ],
     paises: ["cl", "ar"],
     horarios: { cl: "18:00 a 22:00 hrs", ar: "18:00 a 22:00 hrs" },
     solicitante: "Equipo Académico",
     datos: {
-      asignatura: "Intervención en Crisis",
-      docente: "Camila Fuentes",
-      fechaOriginal: "2026-09-17",
-      fechaNueva: "2026-09-24",
+      asignatura:
+        "Diplomado en Abordaje Multidisciplinario de los Trastornos de la Conducta Alimentaria (TCA)",
+      docente: "Mg. Ps. Daniela Ibacache",
       moduloNumero: "3",
-      moduloNombre: "Intervención en Crisis",
-      claseNumero: "2",
+      moduloNombre: "Intervención en crisis",
       motivo: "Licencia médica de la docente.",
     },
-    asunto: "Reprogramación de la clase de Intervención en Crisis del jueves 17 de septiembre",
+    asunto: "Reprogramación de las clases del Diplomado en TCA del jueves 17 de septiembre",
     cuerpo: `Estimado/a estudiante:
 
-Junto con saludar, le informamos que la clase de Intervención en Crisis (módulo 3, Intervención en Crisis · clase 2), programada para el jueves 17 de septiembre, ha sido reprogramada para el jueves 24 de septiembre, en el horario que corresponde a su país.
+Junto con saludar, le informamos que la clase de Diplomado en TCA (módulo 3, Intervención en crisis · clases 2 y 3), programada para el jueves 17 de septiembre, ha sido reprogramada para el jueves 24 de septiembre, en el horario que corresponde a su país.
 
 Horario según su país:
 - Chile: 18:00 a 22:00 hrs
 - Argentina: 18:00 a 22:00 hrs
 
-La sesión se mantiene a cargo de Camila Fuentes. El enlace de acceso es el mismo que utiliza habitualmente y lo encontrará disponible en su aula virtual.
+La sesión se mantiene a cargo de Mg. Ps. Daniela Ibacache. El enlace de acceso es el mismo que utiliza habitualmente y lo encontrará disponible en su aula virtual.
 
 Agradecemos su comprensión ante una situación de fuerza mayor. Quedamos atentos a cualquier consulta a través de este mismo correo.
 
@@ -161,7 +166,7 @@ ${FIRMA}`,
         respuesta: "observaciones",
         comentario: "Agrega una disculpa por el cambio de fecha.",
         validador: "Edwin Hernández",
-        asunto: "Reprogramación de la clase de Intervención en Crisis",
+        asunto: "Reprogramación de las clases del Diplomado en TCA",
         cuerpo: "…",
       },
       {
@@ -170,7 +175,7 @@ ${FIRMA}`,
         respondido: hace(1),
         respuesta: "aprobado",
         validador: "Edwin Hernández",
-        asunto: "Reprogramación de la clase de Intervención en Crisis del jueves 17 de septiembre",
+        asunto: "Reprogramación de las clases del Diplomado en TCA del jueves 17 de septiembre",
         cuerpo: "…",
       },
     ],
@@ -202,12 +207,14 @@ ${FIRMA}`,
     actualizada: hace(0, 1),
     paso: 1,
     alcance: "inicio",
+    clases: [],
     paises: ["cl"],
-    solicitante: "Paula Riquelme",
+    solicitante: "Coordinación Académica",
     datos: {
-      asignatura: "Mindfulness Aplicado",
-      docenteSaliente: "Rodrigo Peña",
-      docenteEntrante: "Andrea Lillo",
+      asignatura:
+        "Neurociencias de los vínculos afectivos y las relaciones de pareja: claves para la evaluación e intervención clínica",
+      docenteSaliente: "Mg. Ps. Jonathan Martínez",
+      docenteEntrante: "Mg. Ps. Nicolás Lorenzini",
     },
   };
 
@@ -216,21 +223,21 @@ ${FIRMA}`,
     creada: hace(12),
     actualizada: hace(8),
     paso: 6,
+    clases: [{ numero: "5", fechaOriginal: "2026-08-28", fechaNueva: "" }],
     paises: ["mx"],
     horarios: { mx: "15:00 a 19:00 hrs" },
     solicitante: "Coordinación Académica",
     datos: {
-      asignatura: "Acreditación ADOS-2",
-      docente: "Jorge Salinas",
-      fecha: "2026-08-28",
+      asignatura: "Acreditación Oficial Clínica Internacional ADOS-2",
+      docente: "Mg. Ps. Hermann Thomas Ehrenfeld",
       motivoPublico: "un corte de energía programado en la sede",
       recuperacion: "La sesión se recupera el sábado 5 de septiembre de 10:00 a 14:00 hrs.",
       motivo: "Aviso de la administradora del edificio con 24 horas de anticipación.",
     },
-    asunto: "Suspensión de la clase de Acreditación ADOS-2 del viernes 28 de agosto",
+    asunto: "Suspensión de la clase de Acreditación Oficial Clínica Internacional ADOS-2 del viernes 28 de agosto",
     cuerpo: `Estimado/a estudiante:
 
-Junto con saludar, le informamos que la clase de Acreditación ADOS-2 del viernes 28 de agosto, de 15:00 a 19:00 hrs (hora de México), ha sido suspendida por un corte de energía programado en la sede.
+Junto con saludar, le informamos que la clase de Acreditación Oficial Clínica Internacional ADOS-2 del viernes 28 de agosto, de 15:00 a 19:00 hrs (hora de México), ha sido suspendida por un corte de energía programado en la sede.
 
 La sesión se recupera el sábado 5 de septiembre de 10:00 a 14:00 hrs.
 
@@ -248,7 +255,7 @@ ${FIRMA}`,
         respondido: hace(10),
         respuesta: "aprobado",
         validador: "Nicole Agüero",
-        asunto: "Suspensión de la clase de Acreditación ADOS-2 del viernes 28 de agosto",
+        asunto: "Suspensión de la clase de Acreditación Oficial Clínica Internacional ADOS-2 del viernes 28 de agosto",
         cuerpo: "…",
       },
     ],

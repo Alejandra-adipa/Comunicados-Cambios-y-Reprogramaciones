@@ -34,7 +34,7 @@ export class ProveedorClaude implements IAProvider {
  */
 export function construirPrompt(entrada: EntradaIA): string {
   const { ctx } = entrada;
-  const campos = camposDe(ctx.tipo, ctx.programa, ctx.alcance);
+  const campos = camposDe(ctx.tipo, ctx.programa);
   const publicos = campos.filter((c) => !c.interno);
   const internos = campos.filter((c) => c.interno);
 

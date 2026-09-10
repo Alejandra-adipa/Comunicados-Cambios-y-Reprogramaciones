@@ -15,7 +15,15 @@ import type { Referencia } from "../referencias";
  */
 export type ContextoComunicado = Pick<
   Solicitud,
-  "tipo" | "programa" | "alcance" | "paises" | "horarios" | "datos" | "zoomSeMantiene" | "zoom"
+  | "tipo"
+  | "programa"
+  | "alcance"
+  | "clases"
+  | "paises"
+  | "horarios"
+  | "datos"
+  | "zoomSeMantiene"
+  | "zoom"
 >;
 
 export type EntradaIA = {

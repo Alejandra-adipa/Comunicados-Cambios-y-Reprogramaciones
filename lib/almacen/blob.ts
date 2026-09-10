@@ -1,6 +1,6 @@
 import { del, get, list, put } from "@vercel/blob";
-import type { Solicitud } from "../modelo";
-import { normalizar } from "../modelo";
+import type { PlantillaGuardada, Solicitud } from "../modelo";
+import { normalizar, normalizarPlantillas } from "../modelo";
 import { idValido, type Almacen } from "./tipos";
 import { solicitudesDemo } from "./demo";
 
@@ -23,6 +23,7 @@ import { solicitudesDemo } from "./demo";
 
 const PREFIJO = "solicitudes/";
 const ruta = (id: string) => `${PREFIJO}${id}.json`;
+const RUTA_PLANTILLAS = "plantillas.json";
 
 /** `useCache: false` porque la aplicación escribe y vuelve a leer de inmediato. */
 async function descargar(pathname: string): Promise<Solicitud | null> {
@@ -93,5 +94,24 @@ export const almacenBlob: Almacen = {
   async borrar(id) {
     if (!idValido(id)) return;
     await del(ruta(id)).catch(() => {});
+  },
+
+  async leerPlantillas() {
+    try {
+      const res = await get(RUTA_PLANTILLAS, { access: "private", useCache: false });
+      if (!res || res.statusCode !== 200) return [];
+      return normalizarPlantillas(await new Response(res.stream).json());
+    } catch {
+      return [];
+    }
+  },
+
+  async guardarPlantillas(lista: PlantillaGuardada[]) {
+    await put(RUTA_PLANTILLAS, JSON.stringify(lista, null, 2), {
+      access: "private",
+      contentType: "application/json",
+      addRandomSuffix: false,
+      allowOverwrite: true,
+    });
   },
 };

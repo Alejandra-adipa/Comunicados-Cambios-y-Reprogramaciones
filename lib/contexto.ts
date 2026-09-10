@@ -13,6 +13,7 @@ export function contextoDe(s: Solicitud): ContextoComunicado {
     tipo: s.tipo,
     programa: s.programa,
     alcance: s.alcance,
+    clases: s.clases,
     paises: s.paises,
     horarios: s.horarios,
     datos: s.datos,

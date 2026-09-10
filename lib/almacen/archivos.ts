@@ -1,8 +1,8 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
-import type { Solicitud } from "../modelo";
-import { normalizar } from "../modelo";
+import type { PlantillaGuardada, Solicitud } from "../modelo";
+import { normalizar, normalizarPlantillas } from "../modelo";
 import { ArchivoDaniado, idValido, type Almacen } from "./tipos";
 
 /**
@@ -14,6 +14,7 @@ import { ArchivoDaniado, idValido, type Almacen } from "./tipos";
  */
 
 const DIR = path.join(process.cwd(), "data", "solicitudes");
+const RUTA_PLANTILLAS = path.join(process.cwd(), "data", "plantillas.json");
 
 async function asegurarDir() {
   await fs.mkdir(DIR, { recursive: true });
@@ -122,6 +123,22 @@ export const almacenArchivos: Almacen = {
     await enCola(id, async () => {
       await fs.rm(ruta, { force: true });
       await fs.rm(`${ruta}.bak`, { force: true });
+    });
+  },
+
+  async leerPlantillas() {
+    await asegurarDir();
+    try {
+      return normalizarPlantillas(JSON.parse(await fs.readFile(RUTA_PLANTILLAS, "utf8")));
+    } catch {
+      return [];
+    }
+  },
+
+  async guardarPlantillas(lista: PlantillaGuardada[]) {
+    await asegurarDir();
+    await enCola("__plantillas__", async () => {
+      await fs.writeFile(RUTA_PLANTILLAS, JSON.stringify(lista, null, 2), "utf8");
     });
   },
 };
