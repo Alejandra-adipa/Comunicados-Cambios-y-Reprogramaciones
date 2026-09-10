@@ -4,7 +4,7 @@ Flujo: desde que el área académica avisa un cambio en un programa hasta que el
 comunicado llega a los estudiantes de todos los países afectados.
 
 **App desplegada:** https://comunicados-cambios-y-reprogramacio.vercel.app
-**Mapa del journey:** [`mapa-journey.excalidraw`](mapa-journey.excalidraw) · vista rápida en [`mapa-journey.svg`](mapa-journey.svg)
+**Mapa del journey:** [`mapa-journey.excalidraw`](mapa-journey.excalidraw) · imagen en [`mapa-journey.png`](mapa-journey.png)
 
 ---
 
@@ -23,16 +23,24 @@ lugares distintos:
 3. La validación con jefatura es un ida y vuelta por chat: se pierde el hilo de
    los ajustes y no queda registro de quién aprobó qué versión.
 4. La lista de destinatarios sale de descargar los Excel de participantes de cada
-   aula virtual y filtrarlos a mano para sacar a profesores y gestión.
+   aula virtual, uno por país, y cuidar a mano que cada archivo vaya al envío
+   correcto.
 5. Los horarios de cada país se calculan de memoria, y cambian dos veces al año
    cuando Chile entra y sale del horario de verano.
 
-El resultado es un proceso lento, fácil de equivocar —un correo a un profesor, un
-horario mal convertido, un ajuste de jefatura que se olvidó— y sin ningún registro
-estructurado de qué se envió, a quién y cuándo.
+Cada comunicado toma entre 15 y 20 minutos, y se envían varios al mes: cuántos
+depende de las eventualidades de cada período, así que hay meses en que se
+acumulan. Los errores que efectivamente ocurren son dos: **errores de redacción**
+y **envíos a la base equivocada**. Y no queda ningún registro estructurado de qué
+se envió, a quién y cuándo.
 
 La aplicación reúne los cinco pasos en un solo recorrido, hace cumplir las reglas
 que hoy dependen de que alguien se acuerde, y deja constancia de cada vuelta.
+
+**Cómo se mide el éxito:** menos tiempo por comunicado y un proceso más expedito.
+Contra los dos errores de hoy: la redacción pasa siempre por un validador antes de
+salir, y cada base queda asociada a su país, con sus totales a la vista antes de
+enviar.
 
 ---
 
@@ -40,13 +48,14 @@ que hoy dependen de que alguien se acuerde, y deja constancia de cada vuelta.
 
 **Usuaria principal: Coordinadora de Experiencia del Cliente.** Es quien ejecuta
 todo el recorrido, de principio a fin. Es el único rol que entra al asistente.
+Al comienzo la usa solo ella; más adelante se sumará otra persona del equipo.
 
 | Rol | Qué hace | Dónde interviene |
 |---|---|---|
 | **Área académica** | Origina la solicitud: avisa que una clase cambia y por qué. | Fuera de la aplicación. Avisa por Slack, o lo deja anotado en el tablero de Monday «Reprogramaciones y cambios». La coordinadora lo registra a mano. |
 | **Coordinadora de Experiencia del Cliente** | Registra la solicitud, redacta, pide validación, arma la lista y envía. | Los seis pasos del asistente. |
 | **Validación** | Aprueba el comunicado o lo devuelve con observaciones. No edita el texto. | Una pantalla propia, a la que llega por un link. No entra al asistente. |
-| **Estudiantes** | Reciben el comunicado y responden si tienen dudas. | Su correo. Las respuestas llegan a la casilla de atención. |
+| **Estudiantes** | Reciben el comunicado y responden si tienen dudas. | Su correo. El comunicado sale desde info@adipa.cl y las respuestas vuelven ahí, desde cualquier país. |
 
 **Quién valida depende del programa**, y siempre firma una sola persona:
 
@@ -57,8 +66,12 @@ todo el recorrido, de principio a fin. Es el único rol que entra al asistente.
 | Diplomado · Postítulo | Estándar | Edwin Hernández |
 | Cualquiera | Sensible | Nicole Agüero |
 
-Un caso sensible es el que puede generar reclamos, contiene información delicada
-o requiere criterio de jefatura superior.
+Un caso sensible es el que ya arrastra historia o tiene alcance internacional:
+por ejemplo, un diplomado que se reprogramó dos veces, o una acreditación con un
+cambio importante. Esos casos, además, se revisan con gerencia.
+
+**Siempre hay un validador disponible:** si el que corresponde no está, valida
+otro del equipo.
 
 ---
 
@@ -195,52 +208,59 @@ virtual tal como sale.
    del comunicado, y nunca aparece en el texto ni parafraseado.
 12. Si el validador dejó observaciones, entonces al volver a redactar se
     incorporan al borrador.
+13. Si el comunicado aplica solo a Chile, entonces el cierre lleva sac@adipa.cl.
+    Si aplica a varios países, entonces nombra la casilla de cada uno:
+    sac@adipa.cl, sac@adipa.co, sac@adipa.mx y sac@adipa.ar, para que el
+    estudiante escriba a la que lo atiende.
 
 **De la validación**
 
-13. Si el tipo de programa es curso, entonces valida Daniel Oyarce.
-14. Si el tipo de programa es acreditación, entonces valida Nicole Agüero.
-15. Si el tipo de programa es diplomado o postítulo, entonces valida Edwin
+14. Si el tipo de programa es curso, entonces valida Daniel Oyarce.
+15. Si el tipo de programa es acreditación, entonces valida Nicole Agüero.
+16. Si el tipo de programa es diplomado o postítulo, entonces valida Edwin
     Hernández.
-16. Si el caso está marcado como sensible, entonces valida Nicole Agüero, y
+17. Si el caso está marcado como sensible, entonces valida Nicole Agüero, y
     reemplaza al validador que correspondía. No se suma una segunda firma.
-17. Si el validador aprueba, entonces el comunicado queda habilitado para avanzar.
-18. Si el validador solicita cambios, entonces el comunicado vuelve a redacción
+18. Si el validador aprueba, entonces el comunicado queda habilitado para avanzar.
+19. Si el validador solicita cambios, entonces el comunicado vuelve a redacción
     con sus observaciones, y el ciclo se repite hasta el visto bueno.
-19. Si el comunicado se edita después de estar aprobado, entonces pierde la
+20. Si el comunicado se edita después de estar aprobado, entonces pierde la
     aprobación y hay que pedirla de nuevo.
-20. Si no existe una aprobación válida, entonces no se puede avanzar al paso de
+21. Si no existe una aprobación válida, entonces no se puede avanzar al paso de
     bases.
 
 **De las bases y los destinatarios**
 
-21. Si el archivo trae columna de rol, entonces solo pasan quienes figuran como
+22. Si el archivo trae columna de rol, entonces solo pasan quienes figuran como
     estudiante; profesores, gestores y monitores quedan fuera.
-22. Si el rol no corresponde a ninguno conocido, entonces el contacto queda fuera
+23. Si el rol no corresponde a ninguno conocido, entonces el contacto queda fuera
     marcado como rol no habilitado.
-23. Si el correo no tiene formato válido, entonces el contacto queda fuera y no
+24. Si el correo no tiene formato válido, entonces el contacto queda fuera y no
     se puede reincorporar a mano.
-24. Si un correo ya apareció antes, entonces se conserva la primera aparición y
+25. Si un correo ya apareció antes, entonces se conserva la primera aparición y
     las siguientes quedan fuera como duplicado.
-25. Si un archivo se asigna a varios países, entonces sus contactos cuentan en
+26. Si un archivo se asigna a varios países, entonces sus contactos cuentan en
     cada uno, y el consolidado cuenta a cada persona una sola vez.
-26. Si el archivo no tiene columna de correo, entonces no se carga y se explica
-    qué encabezado falta.
+27. Si un país del comunicado queda sin listado cargado, entonces aparece en cero
+    en los totales y ese país no recibe el correo. La lectura del archivo igual
+    verifica el encabezado de correo, como resguardo ante un export mal armado.
 
 **Del envío**
 
-27. Si no hay aprobación válida, entonces el botón de envío queda bloqueado, y el
+28. Si no hay aprobación válida, entonces el botón de envío queda bloqueado, y el
     servidor también rechaza la operación.
-28. Si no hay ningún destinatario en la lista final, entonces no se puede enviar.
-29. Si el comunicado ya fue enviado, entonces no se puede volver a enviar.
+29. Si no hay ningún destinatario en la lista final, entonces no se puede enviar.
+30. Si el comunicado ya fue enviado, entonces no se puede volver a enviar.
+31. El comunicado sale siempre desde info@adipa.cl. Si el estudiante responde,
+    entonces la respuesta llega ahí, sin importar su país.
 
 **De los horarios**
 
-30. Si se selecciona un país, entonces aparece un campo de horario propio para ese
+32. Si se selecciona un país, entonces aparece un campo de horario propio para ese
     país, editable siempre.
-31. Si la fecha de la sesión cae sábado, entonces se sugiere la tabla de horarios
+33. Si la fecha de la sesión cae sábado, entonces se sugiere la tabla de horarios
     de sábado; si no, la de lunes a viernes.
-32. El horario que se guarda es el texto que se escribió en ese comunicado. Nunca
+34. El horario que se guarda es el texto que se escribió en ese comunicado. Nunca
     se recalcula después, porque las equivalencias entre países cambian cuando
     Chile entra y sale del horario de verano.
 
@@ -248,52 +268,54 @@ virtual tal como sale.
 
 ## Fuera de alcance
 
-Lo que **no** se construye en esta versión:
+Lo que **no** se construye en esta versión. Las cinco integraciones van en el orden
+en que se conectarían: Monday, Slack, Moodle, Gmail y, al final, la IA.
 
-1. **Integración con el aula virtual.** Los listados de participantes se cargan a
-   mano como archivo. No hay conexión que los traiga ya filtrados por rol.
-2. **Integración con Monday.** El tablero «Reprogramaciones y cambios» no se lee:
+1. **Integración con Monday.** El tablero «Reprogramaciones y cambios» no se lee:
    lo que está anotado ahí se vuelve a escribir a mano en el formulario. Los
    catálogos de programas y docentes tampoco vienen de Monday; son listas locales
    dentro de la aplicación.
-3. **Integración con Slack.** El link de revisión se copia y se pega a mano. No se
+2. **Integración con Slack.** El link de revisión se copia y se pega a mano. No se
    envía solo, ni lo que se comenta por Slack entra automáticamente al formulario.
-4. **Envío real de correos.** No hay conexión con Gmail ni con Google Workspace.
-   El envío se registra pero no sale ningún correo: se sigue haciendo desde Yamm
-   con el CSV exportado.
+3. **Integración con Moodle.** Los listados de participantes se descargan del aula
+   virtual y se cargan a mano como archivo, uno por país.
+4. **Envío directo desde la aplicación.** La idea es que la aplicación envíe los
+   comunicados por su cuenta, desde info@adipa.cl. En esta versión no hay conexión
+   con Gmail ni con Google Workspace: el envío queda registrado, pero el correo
+   sale desde Yamm con el CSV exportado.
 5. **Redacción con un modelo de lenguaje real.** El borrador se arma con
    plantillas deterministas. No hay llamada a ningún servicio de IA.
 6. **Gestión de usuarios y permisos.** No hay cuentas ni contraseñas. Cualquiera
-   con la dirección entra, y cualquiera con el link de revisión puede aprobar.
-7. **Historial y analítica en el tiempo.** Se ve qué se envió y cuándo, pero no
+   con la dirección entra, y cualquiera con el link de revisión puede aprobar. Hoy
+   la usa una sola persona; cuando se sume otra, deja de ser opcional.
+7. **Reasignar el validador.** La aplicación asigna el validador por regla. Si el
+   asignado no está y aprueba otro con el mismo link, la aprobación vale, pero el
+   historial registra el nombre del asignado y no el de quien aprobó.
+8. **Historial y analítica en el tiempo.** Se ve qué se envió y cuándo, pero no
    hay reportes de volumen, de tiempos de aprobación ni de tasas de apertura.
-8. **Edición del comunicado por parte del validador.** Solo puede aprobar o dejar
+9. **Edición del comunicado por parte del validador.** Solo puede aprobar o dejar
    observaciones en texto.
-9. **Formato enriquecido en el correo.** El comunicado sale como texto plano, que
-   es lo que se pega en Yamm. La vista previa muestra cómo se vería con formato,
-   pero ese formato no viaja.
+10. **Formato enriquecido en el correo.** El comunicado sale como texto plano, que
+    es lo que se pega en Yamm. La vista previa muestra cómo se vería con formato,
+    pero ese formato no viaja.
 
 ---
 
 ## Retrospectiva
 
-> Borrador escrito con Claude a partir de lo que efectivamente pasó durante la
-> construcción. Ajústalo con tus palabras antes de entregar.
-
 ### 1. ¿Qué pregunta de Claude te hizo dar cuenta de algo que no tenías claro del flujo?
 
 La pregunta sobre **cómo se distingue a un profesor de un estudiante en el Excel**.
-Yo di por hecho que había una columna de rol y respondí que sí. Cuando Claude
-revisó el archivo real de participantes descubrió que no existe: solo trae nombre,
-apellidos, correo y grupos, con la columna de grupos vacía en las 44 filas. Y los
-correos son casi todos personales, así que tampoco se puede distinguir por dominio.
+Di por hecho que había una columna de rol. Al revisar el archivo real apareció que
+no existe: solo trae nombre, apellidos, correo y grupos, con la columna de grupos
+vacía en las 44 filas.
 
-Eso significaba que la regla que yo consideraba central del proceso —"nunca se le
-manda un comunicado de estudiante a un profesor"— **no se podía automatizar con
-los archivos que descargamos hoy**. El filtro quedó implementado y probado con un
-archivo que sí trae la columna, esperando que el aula virtual la exporte, pero la
-pregunta cambió mi entendimiento del problema: el cuello de botella no está en la
-aplicación, está en lo que el aula virtual nos entrega.
+Eso me obligó a precisar algo que sabía pero no había dicho: los Excel que
+descargamos traen solo estudiantes, nunca profesores, monitores ni gestores. El
+filtro por rol quedó implementado como resguardo, pero el riesgo real no estaba
+ahí: estaba en **subir una base al país equivocado**, que es justamente uno de los
+errores que hoy ocurren. Por eso la aplicación pide el país antes de cargar cada
+archivo y muestra los totales por país antes de enviar.
 
 La segunda pregunta que movió algo fue la de **los horarios por país**. Al
 responderla me di cuenta de que no son un dato fijo que se pueda guardar una vez:
@@ -304,8 +326,8 @@ en vez de una fórmula.
 
 ### 2. ¿Qué diferencia hubo entre tu mapa inicial y lo que terminaste construyendo?
 
-Cuatro diferencias, todas por el mismo motivo: el mapa inicial describía el flujo
-como yo lo tenía en la cabeza, y construirlo obligó a mirar los casos reales.
+Me enredé un poco en los pasos. Al seguir la lógica del flujo iban apareciendo
+varios puntos intermedios que el mapa inicial no tenía:
 
 - **Una clase pasó a ser varias.** El mapa tenía una fecha original y una fecha
   nueva. En la práctica, mover la clase 2 arrastra la 3 y la 4, cada una a su
@@ -322,18 +344,25 @@ como yo lo tenía en la cabeza, y construirlo obligó a mirar los casos reales.
   Terminaron siendo dos independientes: tipo de programa —que define qué datos se
   piden y quién valida— y tipo de comunicado —que define la plantilla—.
 
+Si partiera de nuevo, cambiaría el orden: primero identificaría de manera puntual
+cada error que hoy ocurre, haría prácticas con casos reales, y recién después
+armaría el mapa.
+
 ### 3. Si tuvieras que hacer este flujo de verdad para ADIPA, ¿cuál sería el primer riesgo o pieza faltante?
 
-**El primer riesgo es que no hay control de acceso.** La aplicación maneja correos
-de estudiantes y permite aprobar comunicados institucionales, y hoy cualquiera con
-la dirección puede entrar, descargar el CSV completo y aprobar una validación
-haciéndose pasar por otra persona. Mientras corre en un computador no importa;
-publicada, es lo primero que hay que resolver. En la versión desplegada lo mitigamos
+**El primer riesgo es que no hay control de acceso.** Hoy la aplicación la uso solo
+yo, pero más adelante la va a usar otra persona del equipo, y maneja correos de
+estudiantes y aprobaciones institucionales. Tal como está, cualquiera con la
+dirección puede entrar y descargar el CSV completo, y cualquiera con el link de
+revisión puede aprobar a nombre de otro. En la versión desplegada lo mitigamos
 usando solo datos inventados, pero eso es un parche, no una solución.
 
-**La primera pieza faltante es la conexión con el aula virtual.** Todo lo demás
-—Slack, Monday, el envío por Gmail— ahorra clics. Esta ahorra el paso más frágil
-del proceso: hoy la calidad de la lista de destinatarios depende de que alguien
-descargue el archivo correcto y lo suba al país correcto. Además es la única que
-puede activar la regla de excluir profesores y monitores, que hoy está escrita pero
-sin efecto porque el export no trae el rol.
+**La primera pieza faltante es la conexión con Monday.** Es donde nace el pedido, y
+hoy se vuelve a escribir a mano en el formulario: cada transcripción es una
+oportunidad de error. Después vendrían Slack, Moodle, Gmail —para que la
+aplicación envíe directo desde info@adipa.cl— y al final la IA.
+
+### Cierre
+
+Tomar un proyecto así requiere tiempo y paciencia, pero es una tarea muy
+entretenida, que ayuda a aprender muchísimas cosas y a innovar.

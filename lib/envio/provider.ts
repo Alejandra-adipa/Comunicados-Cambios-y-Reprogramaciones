@@ -1,4 +1,5 @@
 import type { Solicitud } from "../modelo";
+import { PAIS_KEYS, type PaisKey } from "../catalogos";
 
 /**
  * Contrato del envío, con la misma forma que el de la redacción.
@@ -13,15 +14,32 @@ export type ConfiguracionCorreo = {
   /** Cuenta institucional desde la que salen los comunicados. */
   remitente: string;
   nombreRemitente: string;
-  /** Las respuestas van a la casilla de atención, no al remitente. */
+  /** Las respuestas vuelven a info@adipa.cl, que atiende a todos los países. */
   responderA: string;
 };
 
 export const CORREO: ConfiguracionCorreo = {
-  remitente: "comunicados@adipa.cl",
+  remitente: "info@adipa.cl",
   nombreRemitente: "Coordinación de Experiencia del Cliente · Adipa",
-  responderA: "sac@adipa.cl",
+  responderA: "info@adipa.cl",
 };
+
+/**
+ * Cada país atiende en su propia casilla. Un comunicado de varios países tiene
+ * que nombrarlas todas, o el estudiante de México termina escribiendo a Chile.
+ */
+export const CASILLAS: Record<PaisKey, string> = {
+  cl: "sac@adipa.cl",
+  ar: "sac@adipa.ar",
+  mx: "sac@adipa.mx",
+  co: "sac@adipa.co",
+};
+
+/** Las casillas de los países del comunicado, siempre en el mismo orden. */
+export function casillasDe(paises: readonly PaisKey[]): string[] {
+  const orden = PAIS_KEYS.filter((p) => paises.includes(p));
+  return (orden.length > 0 ? orden : (["cl"] as PaisKey[])).map((p) => CASILLAS[p]);
+}
 
 export type ResultadoEnvio = {
   enviados: number;

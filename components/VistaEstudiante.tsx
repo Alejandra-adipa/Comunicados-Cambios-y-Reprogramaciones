@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import type { Solicitud } from "@/lib/modelo";
 import { TIPOS, type TipoKey } from "@/lib/tipos";
 import { PAISES, PROGRAMAS } from "@/lib/catalogos";
-import { CORREO } from "@/lib/envio/provider";
+import { CORREO, casillasDe } from "@/lib/envio/provider";
 
 /**
  * Encabezado del correo según el tipo de comunicado.
@@ -69,7 +69,13 @@ export function VistaEstudiante({
           <span className="text-ink-subtle">&lt;{CORREO.remitente}&gt;</span>
         </dd>
         <dt className="text-xs text-ink-subtle">Responder a</dt>
-        <dd className="text-sm text-ink-muted">{CORREO.responderA}</dd>
+        <dd className="text-sm text-ink-muted">
+          {CORREO.responderA}
+          <span className="block text-xs text-ink-subtle">
+            El cierre del correo nombra además {casillasDe(s.paises).length > 1 ? "la casilla de cada país" : "la casilla del país"}:{" "}
+            {casillasDe(s.paises).join(" · ")}
+          </span>
+        </dd>
         <dt className="text-xs text-ink-subtle">Para</dt>
         <dd className="text-sm text-ink-muted">{ejemplo || "estudiante@correo.cl"}</dd>
         <dt className="text-xs text-ink-subtle">Asunto</dt>

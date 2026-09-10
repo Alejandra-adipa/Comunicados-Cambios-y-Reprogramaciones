@@ -1,7 +1,7 @@
 import { FIRMA } from "../referencias";
-import { PAISES, PROGRAMAS } from "../catalogos";
+import { PAISES, PAIS_KEYS, PROGRAMAS } from "../catalogos";
 import { TIPOS } from "../tipos";
-import { CORREO } from "../envio/provider";
+import { CASILLAS, casillasDe } from "../envio/provider";
 import type { ClaseAfectada } from "../modelo";
 import type { ContextoComunicado, SalidaIA } from "./provider";
 
@@ -164,9 +164,25 @@ function saludo(ctx: ContextoComunicado): string {
 
 const APERTURA = "Junto con saludar cordialmente, esperamos que se encuentren muy bien.";
 
-const cierre = `En caso de tener dudas o requerir apoyo, pueden responder directamente a este correo o escribirnos a ${CORREO.responderA}.
+/**
+ * Cierre. La casilla de atención cambia según el país, así que un comunicado
+ * de varios países las nombra todas y cada estudiante escribe a la suya.
+ */
+function cierre(ctx: ContextoComunicado): string {
+  const paises = PAIS_KEYS.filter((p) => ctx.paises.includes(p));
+  const casillas = casillasDe(ctx.paises);
+
+  const contacto =
+    casillas.length === 1
+      ? `escribirnos a ${casillas[0]}`
+      : `escribirnos a la casilla de atención de su país (${paises
+          .map((p) => `${PAISES[p].nombre}: ${CASILLAS[p]}`)
+          .join(" · ")})`;
+
+  return `En caso de tener dudas o requerir apoyo, pueden responder directamente a este correo o ${contacto}.
 
 ${FIRMA}`;
+}
 
 /** "del módulo 3, Evaluación e intervención" o cadena vacía. */
 export function referenciaClase(ctx: ContextoComunicado): string {
@@ -232,7 +248,7 @@ export function plantilla(ctx: ContextoComunicado): SalidaIA {
           calendario(ctx, true),
           zoom,
           "Queremos expresar nuestras disculpas por este ajuste. Entendemos que una modificación de fechas puede afectar su planificación personal, laboral y académica, por lo que lamentamos las molestias y agradecemos su comprensión.",
-          cierre,
+          cierre(ctx),
         ),
       };
     }
@@ -248,7 +264,7 @@ export function plantilla(ctx: ContextoComunicado): SalidaIA {
           `Les informamos que, a partir del ${fechaLarga(ctx.datos.fechaEfectiva)}, ${alInicio ? `el ${programa}` : `las clases${clase}`} estará${alInicio ? "" : "n"} a cargo de ${entrante}, quien reemplaza a ${txt(ctx, "docenteSaliente")}.`,
           `${perfil ? `${perfil} ` : ""}La planificación, las evaluaciones y el horario se mantienen sin cambios.`,
           zoom,
-          cierre,
+          cierre(ctx),
         ),
       };
     }
@@ -267,7 +283,7 @@ export function plantilla(ctx: ContextoComunicado): SalidaIA {
             : tabla,
           txt(ctx, "recuperacion"),
           "Lamentamos los inconvenientes y agradecemos su comprensión.",
-          cierre,
+          cierre(ctx),
         ),
       };
     }
@@ -283,7 +299,7 @@ export function plantilla(ctx: ContextoComunicado): SalidaIA {
           `Les informamos que, a partir del ${fechaLarga(ctx.datos.vigenciaDesde)}, ${alInicio ? `el ${programa}` : `las clases${clase}`} cambia${alInicio ? "" : "n"} de horario. Las sesiones, que se dictaban de ${txt(ctx, "horarioAnterior")}, se realizarán ${nuevo}${dias ? ` los días ${dias}` : ""}.`,
           tabla,
           `El cambio se mantiene por el resto del período y ${alInicio ? "el programa continúa" : "las clases continúan"} a cargo de ${txt(ctx, "docente")}. ${zoom}`,
-          cierre,
+          cierre(ctx),
         ),
       };
     }
@@ -304,7 +320,7 @@ export function plantilla(ctx: ContextoComunicado): SalidaIA {
           "En esta sesión revisaremos la organización del programa, la modalidad de trabajo y los aspectos prácticos que necesitan conocer antes de comenzar. Habrá un espacio final para responder sus consultas.",
           zoom,
           "Les recomendamos conectarse unos minutos antes del inicio.",
-          cierre,
+          cierre(ctx),
         ),
       };
     }
@@ -323,7 +339,7 @@ export function plantilla(ctx: ContextoComunicado): SalidaIA {
           txt(ctx, "mensajeClave"),
           parrafoAccion,
           "Agradecemos su comprensión.",
-          cierre,
+          cierre(ctx),
         ),
       };
     }
