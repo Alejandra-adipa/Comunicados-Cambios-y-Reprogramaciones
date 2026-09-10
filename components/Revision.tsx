@@ -8,6 +8,7 @@ import { PAISES, PROGRAMAS } from "@/lib/catalogos";
 import { validadorDe } from "@/lib/validacion";
 import { api } from "@/lib/cliente";
 import { Tarjeta, Boton, Aviso, Etiqueta, Girador, Eyebrow, HeroOrbs } from "./ui";
+import type { ReactNode } from "react";
 
 const fecha = (iso: string) =>
   new Date(iso).toLocaleString("es-CL", {
@@ -24,7 +25,7 @@ const fecha = (iso: string) =>
  * el comunicado completo y las dos únicas acciones que le corresponden. No puede
  * editar el texto — si algo hay que cambiar, se pide por observaciones.
  */
-export function Revision({ inicial }: { inicial: Solicitud }) {
+export function Revision({ inicial, marca }: { inicial: Solicitud; marca?: ReactNode }) {
   const [s, setS] = useState(inicial);
   const [comentario, setComentario] = useState("");
   const [pidiendoCambios, setPidiendoCambios] = useState(false);
@@ -54,6 +55,7 @@ export function Revision({ inicial }: { inicial: Solicitud }) {
       <header className="relative isolate overflow-hidden bg-brand text-white">
         <HeroOrbs className="text-white opacity-10" />
         <div className="relative mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
+          {marca && <div className="mb-6">{marca}</div>}
           <Eyebrow className="text-white/80">Revisión de comunicado</Eyebrow>
           <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
             {TIPOS[s.tipo].nombre}

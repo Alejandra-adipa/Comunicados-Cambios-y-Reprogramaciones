@@ -47,7 +47,7 @@ export default async function Inicio() {
         <HeroOrbs className="text-white opacity-10" />
         <div className="relative mx-auto w-full max-w-350 px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
           <div className="mb-8 flex justify-center">
-            <Marca modo="white" />
+            <Marca contenedor="blanco" alto="h-9" />
           </div>
           <div className="mx-auto max-w-3xl text-center">
             <Eyebrow className="text-white/80">Experiencia del Cliente</Eyebrow>
